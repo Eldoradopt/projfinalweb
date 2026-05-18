@@ -1,0 +1,108 @@
+@page
+@model Proj_finalweb_loja.Pages.Anuncios.DetailsModel
+@{
+    ViewData["Title"] = Model.Anuncio.Titulo;
+    var principalImg = Model.Anuncio.Imagens.FirstOrDefault(i => i.Principal) ?? Model.Anuncio.Imagens.FirstOrDefault() ?? new Imagem { CaminhoFicheiro = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80" };
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+        <li class="breadcrumb-item"><a asp-page="/Anuncios/Index" class="text-decoration-none text-muted">Artigos</a></li>
+        <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Detalhes</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- 1. Left Column: Product Image (7 Cols) -->
+    <div class="col-lg-7">
+        <div class="bg-white border border-light p-3 shadow-sm text-center position-relative overflow-hidden" style="border-radius: var(--radius-lg);">
+            <span class="badge-premium">
+                @{
+                    var estadoName = Model.Anuncio.EstadoProduto.ToString();
+                    switch (Model.Anuncio.EstadoProduto)
+                    {
+                        case EstadoProduto.Novo: estadoName = "Novo"; break;
+                        case EstadoProduto.ComoNovo: estadoName = "Como Novo"; break;
+                        case EstadoProduto.BomEstado: estadoName = "Bom Estado"; break;
+                        case EstadoProduto.Usado: estadoName = "Usado"; break;
+                        case EstadoProduto.ParaPecas: estadoName = "Para Peças"; break;
+                    }
+                }
+                @estadoName
+            </span>
+            <img src="@principalImg.CaminhoFicheiro" alt="@Model.Anuncio.Titulo" class="img-fluid w-100" style="max-height: 500px; object-fit: contain; border-radius: var(--radius-md);" />
+        </div>
+    </div>
+
+    <!-- 2. Right Column: Details & Seller (5 Cols) -->
+    <div class="col-lg-5">
+        <!-- Main details Card -->
+        <div class="bg-white border border-light p-4 mb-4 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="card-category-premium fs-7 mb-2">@Model.Anuncio.Categoria?.Nome</div>
+            <h1 class="fw-extrabold h2 mb-3 text-dark">@Model.Anuncio.Titulo</h1>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="fs-2 fw-extrabold text-dark">@Model.Anuncio.Preco.ToString("N2") €</span>
+                <span class="badge bg-success-light text-success px-3 py-2 fw-bold rounded-pill" style="background-color: rgba(16, 185, 129, 0.1); color: var(--clr-success) !important;">
+                    <i class="bi bi-check2-circle"></i> Disponível
+                </span>
+            </div>
+
+            <hr class="text-muted opacity-25 mb-4" />
+
+            <h6 class="fw-bold text-uppercase tracking-wider text-muted small mb-3">Informações Adicionais</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="bg-light p-3 rounded" style="border-radius: var(--radius-md);">
+                        <span class="d-block text-muted small">Estado</span>
+                        <span class="fw-bold">@estadoName</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-light p-3 rounded" style="border-radius: var(--radius-md);">
+                        <span class="d-block text-muted small">Publicado em</span>
+                        <span class="fw-bold">@Model.Anuncio.DataPublicacao.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h6 class="fw-bold text-uppercase tracking-wider text-muted small mb-2">Descrição</h6>
+            <p class="text-muted small" style="line-height: 1.6; white-space: pre-line;">@Model.Anuncio.Descricao</p>
+        </div>
+
+        <!-- Seller Contact Card -->
+        <div class="bg-white border border-light p-4 shadow-sm" style="border-radius: var(--radius-lg);">
+            <h6 class="fw-bold mb-3"><i class="bi bi-person-badge text-primary"></i> Informação do Vendedor</h6>
+            
+            <div class="d-flex align-items-center gap-3 mb-4">
+                @if (!string.IsNullOrWhiteSpace(Model.Anuncio.Vendedor?.FotoPerfilPath))
+                {
+                    <img src="@Model.Anuncio.Vendedor.FotoPerfilPath" alt="@Model.Anuncio.Vendedor.Nome" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;" />
+                }
+                else
+                {
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; font-size: 1.25rem;">
+                        @(!string.IsNullOrEmpty(Model.Anuncio.Vendedor?.Nome) ? Model.Anuncio.Vendedor.Nome.Substring(0, 1).ToUpper() : "U")
+                    </div>
+                }
+                
+                <div>
+                    <h6 class="fw-bold mb-0">@Model.Anuncio.Vendedor?.Nome</h6>
+                    <span class="text-muted small"><i class="bi bi-geo-alt"></i> @Model.Anuncio.Vendedor?.Cidade</span>
+                </div>
+            </div>
+
+            <!-- Seller Actions -->
+            <div class="d-flex flex-column gap-2">
+                <a href="tel:@Model.Anuncio.Vendedor?.PhoneNumber" class="btn btn-premium w-100 justify-content-center">
+                    <i class="bi bi-telephone-fill"></i> Ligar: @Model.Anuncio.Vendedor?.PhoneNumber
+                </a>
+                <a asp-page="/Mensagens/Chat" asp-route-destinatarioId="@Model.Anuncio.VendedorFK" asp-route-anuncioId="@Model.Anuncio.Id" class="btn btn-premium-outline w-100 justify-content-center">
+                    <i class="bi bi-chat-left-text"></i> Enviar Mensagem
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

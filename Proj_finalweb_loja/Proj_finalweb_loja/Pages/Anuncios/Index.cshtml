@@ -1,0 +1,157 @@
+@page
+@model Proj_finalweb_loja.Pages.Anuncios.IndexModel
+@{
+    ViewData["Title"] = "Artigos em Segunda Mão";
+}
+
+<div class="row g-4">
+    <!-- 1. Filters Sidebar (3 Cols) -->
+    <div class="col-lg-3">
+        <div class="bg-white border border-light p-4 shadow-sm sticky-lg-top" style="border-radius: var(--radius-lg); top: 100px; z-index: 10;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-sliders text-primary"></i> Filtros</h5>
+                <a asp-page="/Anuncios/Index" class="text-decoration-none text-muted small"><i class="bi bi-arrow-counterclockwise"></i> Limpar</a>
+            </div>
+            
+            <form method="get">
+                <!-- Search input hidden or duplicated for ease of sidebar filtering -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-uppercase tracking-wider text-muted">Pesquisa por texto</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="searchString" value="@Model.SearchString" class="form-control border-start-0" placeholder="Título ou palavra..." />
+                    </div>
+                </div>
+
+                <!-- Categories filter -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-uppercase tracking-wider text-muted">Categoria</label>
+                    <select name="categoriaId" class="form-select">
+                        <option value="">Todas as Categorias</option>
+                        @foreach (var parent in Model.Categorias)
+                        {
+                            <option value="@parent.Id" selected="@(Model.CategoriaId == parent.Id ? "selected" : null)" class="fw-bold">@parent.Nome</option>
+                            @foreach (var sub in parent.Subcategorias)
+                            {
+                                <option value="@sub.Id" selected="@(Model.CategoriaId == sub.Id ? "selected" : null)">&nbsp;&nbsp;— @sub.Nome</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Price limits -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-uppercase tracking-wider text-muted">Preço (€)</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="number" name="minPrice" value="@Model.MinPrice" min="0" class="form-control" placeholder="Mín" />
+                        </div>
+                        <div class="col-6">
+                            <input type="number" name="maxPrice" value="@Model.MaxPrice" min="0" class="form-control" placeholder="Máx" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preserved Sorting -->
+                <input type="hidden" name="orderBy" value="@Model.OrderBy" />
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-premium w-100 py-2">
+                    <i class="bi bi-funnel"></i> Aplicar Filtros
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Main Content Grid (9 Cols) -->
+    <div class="col-lg-9">
+        <!-- Top Toolbar -->
+        <div class="bg-white border border-light p-3 mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3" style="border-radius: var(--radius-md);">
+            <div class="text-muted small">
+                Encontrados <span class="fw-bold text-dark">@Model.Anuncios.Count</span> artigos disponíveis.
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small text-nowrap">Ordenar por:</span>
+                <form method="get" id="sortForm" class="d-inline-block">
+                    <!-- Preserve existing filter states when sorting -->
+                    <input type="hidden" name="searchString" value="@Model.SearchString" />
+                    <input type="hidden" name="categoriaId" value="@Model.CategoriaId" />
+                    <input type="hidden" name="minPrice" value="@Model.MinPrice" />
+                    <input type="hidden" name="maxPrice" value="@Model.MaxPrice" />
+                    
+                    <select name="orderBy" class="form-select form-select-sm border-light bg-light" onchange="document.getElementById('sortForm').submit();">
+                        <option value="recent" selected="@(Model.OrderBy == "recent" || string.IsNullOrEmpty(Model.OrderBy) ? "selected" : null)">Mais Recentes</option>
+                        <option value="price_asc" selected="@(Model.OrderBy == "price_asc" ? "selected" : null)">Preço: Mais Baixo</option>
+                        <option value="price_desc" selected="@(Model.OrderBy == "price_desc" ? "selected" : null)">Preço: Mais Alto</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+            @if (Model.Anuncios != null && Model.Anuncios.Any())
+            {
+                @foreach (var ad in Model.Anuncios)
+                {
+                    var principalImg = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault() ?? new Imagem { CaminhoFicheiro = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80" };
+                    
+                    <div class="col">
+                        <div class="card-premium">
+                            <div class="card-img-container">
+                                <span class="badge-premium">
+                                    @{
+                                        var estadoName = ad.EstadoProduto.ToString();
+                                        switch (ad.EstadoProduto)
+                                        {
+                                            case EstadoProduto.Novo: estadoName = "Novo"; break;
+                                            case EstadoProduto.ComoNovo: estadoName = "Como Novo"; break;
+                                            case EstadoProduto.BomEstado: estadoName = "Bom Estado"; break;
+                                            case EstadoProduto.Usado: estadoName = "Usado"; break;
+                                            case EstadoProduto.ParaPecas: estadoName = "Para Peças"; break;
+                                        }
+                                    }
+                                    @estadoName
+                                </span>
+                                
+                                <button class="btn-favorite-badge shadow-sm" type="button" title="Adicionar aos favoritos">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                                
+                                <img src="@principalImg.CaminhoFicheiro" alt="@ad.Titulo" class="card-img-premium" />
+                            </div>
+                            <div class="card-body-premium">
+                                <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                                <h5 class="card-title-premium">
+                                    <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark hover-primary">
+                                        @ad.Titulo
+                                    </a>
+                                </h5>
+                                <div class="card-price-premium mt-auto">
+                                    <span>@ad.Preco.ToString("N2") €</span>
+                                </div>
+                            </div>
+                            <div class="card-footer-premium">
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-geo-alt"></i> @ad.Vendedor?.Cidade
+                                </span>
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-clock"></i> @ad.DataPublicacao.ToString("dd/MM")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted py-5 bg-white border border-light" style="border-radius: var(--radius-lg);">
+                    <i class="bi bi-search fs-1 mb-3 d-block text-primary"></i>
+                    <h5 class="fw-bold text-dark">Nenhum artigo encontrado</h5>
+                    <p class="small text-muted mb-0">Tenta ajustar ou limpar os filtros para encontrar o que procuras.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

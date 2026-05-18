@@ -1,10 +1,196 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Início";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Banner Section -->
+<section class="hero-premium">
+    <div class="row align-items-center py-4">
+        <div class="col-lg-6 hero-content mb-4 mb-lg-0">
+            <span class="badge bg-indigo-light text-primary mb-3 px-3 py-2 fs-7 fw-semibold rounded-pill" style="background-color: var(--clr-primary-light); color: var(--clr-primary) !important;">
+                <i class="bi bi-stars"></i> A comunidade de segunda mão do IPT
+            </span>
+            <h1 class="display-4 fw-extrabold mb-3 lh-sm" style="color: var(--clr-text-main);">
+                Dá uma segunda vida aos teus artigos favoritos!
+            </h1>
+            <p class="lead text-muted mb-4 fs-5">
+                Compre e venda de forma simples, rápida e segura no Bazar oficial do Instituto Politécnico de Tomar. Sem taxas extra, apenas negócios locais!
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a class="btn btn-premium btn-lg" asp-page="/Anuncios/Create">
+                    <i class="bi bi-plus-circle"></i> Começar a Vender
+                </a>
+                <a class="btn btn-premium-outline btn-lg" asp-page="/Anuncios/Index">
+                    <i class="bi bi-search"></i> Explorar Artigos
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6 text-center position-relative">
+            <!-- Simulated Premium Graphic using pure HTML & CSS -->
+            <div class="position-relative d-inline-block px-4">
+                <div class="bg-gradient p-4 shadow-premium" style="background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary)); border-radius: var(--radius-xl); max-width: 440px; margin: 0 auto; color: white;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold fs-5"><i class="bi bi-check-circle-fill"></i> Bazar Seguro</span>
+                        <span class="badge bg-white text-dark py-2 px-3 fw-bold rounded-pill shadow-sm">100% Grátis</span>
+                    </div>
+                    <div class="text-start mb-4">
+                        <h3 class="fw-extrabold text-white mb-2">Compre Localmente</h3>
+                        <p class="text-white-50 small mb-0">Encontra livros, portáteis, calculadoras ou vestuário de outros colegas a preços incríveis sem sair do campus.</p>
+                    </div>
+                    <div class="bg-white text-dark rounded-lg p-3 text-start d-flex align-items-center gap-3 shadow-md" style="border-radius: var(--radius-md);">
+                        <div class="bg-light rounded-circle p-2 text-primary">
+                            <i class="bi bi-lightning-charge fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Negócio Imediato</h6>
+                            <p class="text-muted small mb-0">Combina a entrega e o pagamento em mãos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-primary fw-bold text-uppercase tracking-wider" style="font-size: 0.8rem; letter-spacing: 0.05em;">Categorias</span>
+            <h2 class="fw-bold mt-1">Explorar por Categoria</h2>
+        </div>
+        <a class="btn btn-link text-primary nav-link-premium p-2 fw-semibold" asp-page="/Anuncios/Index">Ver Todos <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-4 justify-content-center">
+        @if (Model.CategoriasPrincipais != null && Model.CategoriasPrincipais.Any())
+        {
+            @foreach (var cat in Model.CategoriasPrincipais)
+            {
+                <div class="col">
+                    <a class="category-circle-link" asp-page="/Anuncios/Index" asp-route-categoriaId="@cat.Id">
+                        <div class="category-icon-wrapper">
+                            <i class="bi bi-@cat.Icone"></i>
+                        </div>
+                        <span class="category-circle-name">@cat.Nome</span>
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center text-muted py-4">
+                <i class="bi bi-info-circle fs-3 mb-2 d-block"></i>
+                Nenhuma categoria disponível no momento. Run migrations and check setup.
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Recent Listings Section -->
+<section class="mb-5 py-4 border-top">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-primary fw-bold text-uppercase tracking-wider" style="font-size: 0.8rem; letter-spacing: 0.05em;">Novidades</span>
+            <h2 class="fw-bold mt-1">Artigos Recém Adicionados</h2>
+        </div>
+        <a class="btn btn-link text-primary nav-link-premium p-2 fw-semibold" asp-page="/Anuncios/Index">Ver Todos <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+        @if (Model.AnunciosRecentes != null && Model.AnunciosRecentes.Any())
+        {
+            @foreach (var ad in Model.AnunciosRecentes)
+            {
+                var principalImg = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault() ?? new Imagem { CaminhoFicheiro = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80" };
+                
+                <div class="col">
+                    <div class="card-premium">
+                        <div class="card-img-container">
+                            <span class="badge-premium">
+                                @{
+                                    var estadoName = ad.EstadoProduto.ToString();
+                                    switch (ad.EstadoProduto)
+                                    {
+                                        case EstadoProduto.Novo: estadoName = "Novo"; break;
+                                        case EstadoProduto.ComoNovo: estadoName = "Como Novo"; break;
+                                        case EstadoProduto.BomEstado: estadoName = "Bom Estado"; break;
+                                        case EstadoProduto.Usado: estadoName = "Usado"; break;
+                                        case EstadoProduto.ParaPecas: estadoName = "Para Peças"; break;
+                                    }
+                                }
+                                @estadoName
+                            </span>
+                            
+                            <button class="btn-favorite-badge shadow-sm" type="button" title="Adicionar aos favoritos">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            
+                            <img src="@principalImg.CaminhoFicheiro" alt="@ad.Titulo" class="card-img-premium" />
+                        </div>
+                        <div class="card-body-premium">
+                            <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                            <h5 class="card-title-premium">
+                                <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark hover-primary">
+                                    @ad.Titulo
+                                </a>
+                            </h5>
+                            <div class="card-price-premium mt-auto">
+                                <span>@ad.Preco.ToString("N2") €</span>
+                            </div>
+                        </div>
+                        <div class="card-footer-premium">
+                            <span class="d-flex align-items-center gap-1">
+                                <i class="bi bi-geo-alt"></i> @ad.Vendedor?.Cidade
+                            </span>
+                            <span class="d-flex align-items-center gap-1">
+                                <i class="bi bi-clock"></i> @ad.DataPublicacao.ToString("dd/MM")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center text-muted py-5">
+                <i class="bi bi-shop fs-2 mb-2 d-block"></i>
+                Ainda não há artigos à venda. Sê o primeiro a publicar um artigo!
+            </div>
+        }
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 border-top">
+    <div class="text-center mb-5">
+        <span class="text-primary fw-bold text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.05em;">Guia Rápido</span>
+        <h2 class="fw-bold mt-1">Como Funciona o BazarIPT</h2>
+        <p class="text-muted max-w-2xl mx-auto">Em apenas 3 passos podes vender o que já não usas ou comprar o que precisas.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4 text-center px-4">
+            <div class="bg-white shadow-sm mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; border: 1px solid var(--clr-border);">
+                <i class="bi bi-plus-lg fs-3 text-primary"></i>
+            </div>
+            <h5 class="fw-bold mb-2">1. Publica o teu Artigo</h5>
+            <p class="text-muted small">Regista-te, tira fotos ao produto, preenche os detalhes e define o teu preço ideal.</p>
+        </div>
+        <div class="col-md-4 text-center px-4">
+            <div class="bg-white shadow-sm mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; border: 1px solid var(--clr-border);">
+                <i class="bi bi-chat-text fs-3 text-primary"></i>
+            </div>
+            <h5 class="fw-bold mb-2">2. Conversa pelo Chat</h5>
+            <p class="text-muted small">Os interessados entram em contacto através do chat interno para esclarecer dúvidas e negociar.</p>
+        </div>
+        <div class="col-md-4 text-center px-4">
+            <div class="bg-white shadow-sm mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; border: 1px solid var(--clr-border);">
+                <i class="bi bi-handshake fs-3 text-primary"></i>
+            </div>
+            <h5 class="fw-bold mb-2">3. Conclui o Negócio</h5>
+            <p class="text-muted small">Combina o encontro em segurança no campus do IPT para entregar o artigo e efetuar o pagamento.</p>
+        </div>
+    </div>
+</section>
