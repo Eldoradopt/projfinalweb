@@ -1,7 +1,4 @@
-# Marketplace de Artigos em Segunda Mão
-
-
-
+# Marketplace de Artigos em Segunda Mão #
 
 
 ###  Design & Experiência de Utilizador (UX/UI Premium)
@@ -31,9 +28,10 @@ O projeto baseia-se numa arquitetura **Code-First** com as seguintes entidades r
 2.  **`Categoria`**: Modelo auto-referencial que organiza de forma hierárquica categorias principais e subcategorias.
 3.  **`Anuncio`**: Publicação de venda (Título, Descrição, Preço, Estado transacional e Condição física).
 4.  **`Imagem`**: Ficheiros de imagem ou URLs associados aos produtos.
-5.  **`Mensagem`**: Registo de mensagens enviadas entre comprador e vendedor sobre um artigo.
-6.  **`Avaliacao`**: Sistema de classificação pós-venda (1 a 5 estrelas).
-7.  **`Favorito`**: Tabela N-M de ligação para favoritos utilizando chaves compostas.
+5.  (sob avalicao se deviam ser adicionados e a sua viabilidade)
+6.  **`Mensagem`**: Registo de mensagens enviadas entre comprador e vendedor sobre um artigo. *********
+7.  **`Avaliacao`**: Sistema de classificação pós-venda (1 a 5 estrelas).*********
+8.  **`Favorito`**: Tabela N-M de ligação para favoritos utilizando chaves compostas. *********
 
 > [!NOTE]
 > Configurada a integridade referencial com `DeleteBehavior.Restrict` em relações cíclicas para evitar conflitos de cascata múltipla (`Error 1785`) no motor do SQL Server.
