@@ -19,6 +19,7 @@ namespace Proj_finalweb_loja.Pages
 
         public IList<Categoria> CategoriasPrincipais { get; set; } = new List<Categoria>();
         public IList<Anuncio> AnunciosRecentes { get; set; } = new List<Anuncio>();
+        public IList<Tag> ColecoesDestaque { get; set; } = new List<Tag>();
 
         public async Task OnGetAsync()
         {
@@ -31,7 +32,16 @@ namespace Proj_finalweb_loja.Pages
                 .Include(a => a.Imagens)
                 .Include(a => a.Vendedor)
                 .Include(a => a.Categoria)
+                .Include(a => a.AnuncioTags)
+                    .ThenInclude(at => at.Tag)
                 .OrderByDescending(a => a.DataPublicacao)
+                .Take(4)
+                .ToListAsync();
+
+            ColecoesDestaque = await _context.Tags
+                .Where(t => t.EColecaoEspecial)
+                .Include(t => t.AnuncioTags)
+                .OrderBy(t => t.Nome)
                 .Take(4)
                 .ToListAsync();
         }

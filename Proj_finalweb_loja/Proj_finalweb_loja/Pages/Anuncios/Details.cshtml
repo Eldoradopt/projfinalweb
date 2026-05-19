@@ -70,6 +70,30 @@
             
             <h6 class="fw-bold text-uppercase tracking-wider text-muted small mb-2">Descrição</h6>
             <p class="text-muted small" style="line-height: 1.6; white-space: pre-line;">@Model.Anuncio.Descricao</p>
+
+            @if (Model.Anuncio.AnuncioTags != null && Model.Anuncio.AnuncioTags.Any())
+            {
+                <hr class="text-muted opacity-25 my-4" />
+                <h6 class="fw-bold text-uppercase tracking-wider text-muted small mb-2">Tags</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var at in Model.Anuncio.AnuncioTags)
+                    {
+                        var tag = at.Tag;
+                        if (tag.EColecaoEspecial)
+                        {
+                            <a asp-page="/Colecoes/Detalhes" asp-route-tagId="@tag.Id" class="btn btn-sm text-white px-3 py-1 fw-bold rounded-pill" style="background: @(tag.CorHex ?? "#6366f1"); font-size: 0.8rem;">
+                                <i class="bi bi-@(tag.Icone ?? "star-fill") me-1"></i> @tag.Nome
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-page="/Anuncios/Index" asp-route-searchString="@tag.Nome" class="btn btn-sm btn-light border text-dark px-3 py-1 rounded-pill" style="font-size: 0.8rem;">
+                                <i class="bi bi-tag-fill text-muted me-1"></i> @tag.Nome
+                            </a>
+                        }
+                    }
+                </div>
+            }
         </div>
 
         <!-- Seller Contact Card -->

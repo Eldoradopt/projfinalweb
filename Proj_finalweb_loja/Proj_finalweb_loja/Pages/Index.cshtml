@@ -88,6 +88,56 @@
     </div>
 </section>
 
+<!-- Coleções Especiais Section -->
+@if (Model.ColecoesDestaque != null && Model.ColecoesDestaque.Any())
+{
+    <section class="mb-5 py-4 border-top">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-primary fw-bold text-uppercase tracking-wider" style="font-size: 0.8rem; letter-spacing: 0.05em;">✨ Exclusivo</span>
+                <h2 class="fw-bold mt-1">Coleções em Destaque</h2>
+            </div>
+            <a class="btn btn-link text-primary nav-link-premium p-2 fw-semibold" asp-page="/Colecoes/Index">Ver Todas <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+            @foreach (var col in Model.ColecoesDestaque)
+            {
+                var cor = col.CorHex ?? "#6366f1";
+                var icone = col.Icone ?? "tag";
+                var count = col.AnuncioTags.Count;
+                
+                <div class="col">
+                    <a asp-page="/Colecoes/Detalhes" asp-route-tagId="@col.Id" class="text-decoration-none">
+                        <div class="d-flex align-items-center gap-3 p-3 bg-white border border-light shadow-sm position-relative overflow-hidden col-card"
+                             style="border-radius: var(--radius-lg); transition: transform 0.2s, box-shadow 0.2s;">
+                            <!-- Tiny background glow -->
+                            <div style="position: absolute; right: -10px; bottom: -10px; font-size: 4rem; color: @cor; opacity: 0.08;">
+                                <i class="bi bi-@icone"></i>
+                            </div>
+                            <div class="rounded d-flex align-items-center justify-content-center text-white"
+                                 style="width: 48px; height: 48px; background: linear-gradient(135deg, @cor, @(cor)cc); flex-shrink: 0;">
+                                <i class="bi bi-@icone" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">@col.Nome</h6>
+                                <span class="text-muted small">@count artigos</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<style>
+    .col-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+    }
+</style>
+
 <!-- Recent Listings Section -->
 <section class="mb-5 py-4 border-top">
     <div class="d-flex justify-content-between align-items-end mb-4">
@@ -130,7 +180,21 @@
                             <img src="@principalImg.CaminhoFicheiro" alt="@ad.Titulo" class="card-img-premium" />
                         </div>
                         <div class="card-body-premium">
-                            <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="card-category-premium mb-0">@ad.Categoria?.Nome</div>
+                                @if (ad.AnuncioTags != null && ad.AnuncioTags.Any())
+                                {
+                                    <div class="d-flex gap-1 flex-wrap justify-content-end">
+                                        @foreach (var at in ad.AnuncioTags.Take(2))
+                                        {
+                                            var tag = at.Tag;
+                                            <span class="badge rounded-pill fw-bold" style="font-size:0.65rem; background:@(tag.EColecaoEspecial ? (tag.CorHex ?? "#6366f1") : "#f3f4f6"); color:@(tag.EColecaoEspecial ? "#ffffff" : "#4b5563");">
+                                                @tag.Nome
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                            </div>
                             <h5 class="card-title-premium">
                                 <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark hover-primary">
                                     @ad.Titulo

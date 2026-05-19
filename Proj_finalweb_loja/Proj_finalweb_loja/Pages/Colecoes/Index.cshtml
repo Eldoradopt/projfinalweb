@@ -1,0 +1,72 @@
+@page
+@model Proj_finalweb_loja.Pages.Colecoes.IndexModel
+@{
+    ViewData["Title"] = "Coleções em Destaque";
+}
+
+<!-- Header -->
+<div class="text-center mb-5">
+    <span class="badge rounded-pill px-3 py-2 mb-3 fw-bold" style="background:rgba(99,102,241,0.1);color:var(--clr-primary);font-size:0.8rem;letter-spacing:0.05em;">
+        ✨ COLEÇÕES ESPECIAIS
+    </span>
+    <h1 class="fw-extrabold display-6 mb-2">Encontra o que procuras</h1>
+    <p class="text-muted mx-auto" style="max-width:520px;">
+        Coleções curadas dos produtos mais populares — acede diretamente a todos os artigos de uma categoria específica.
+    </p>
+</div>
+
+@if (!Model.Colecoes.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-collection fs-1 d-block mb-3 text-primary"></i>
+        <h5>Sem coleções disponíveis de momento.</h5>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+        @foreach (var c in Model.Colecoes)
+        {
+            var cor = c.Tag.CorHex ?? "#6366f1";
+            var icone = c.Tag.Icone ?? "tag";
+            <div class="col">
+                <a asp-page="/Colecoes/Detalhes" asp-route-tagId="@c.Tag.Id" class="text-decoration-none">
+                    <div class="colecao-card h-100 overflow-hidden shadow-sm"
+                         style="border-radius:var(--radius-lg);transition:transform 0.2s,box-shadow 0.2s;">
+                        
+                        <!-- Coloured top -->
+                        <div class="d-flex align-items-center justify-content-center"
+                             style="height:110px;background:linear-gradient(135deg,@cor,@(cor)99);">
+                            <i class="bi bi-@icone text-white" style="font-size:3rem;opacity:0.9;"></i>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="bg-white p-3 d-flex flex-column gap-1">
+                            <h6 class="fw-bold mb-0 text-dark">@c.Tag.Nome</h6>
+                            @if (!string.IsNullOrWhiteSpace(c.Tag.Descricao))
+                            {
+                                <p class="text-muted mb-1" style="font-size:0.78rem;line-height:1.4;">
+                                    @(c.Tag.Descricao.Length > 70 ? c.Tag.Descricao.Substring(0, 70) + "…" : c.Tag.Descricao)
+                                </p>
+                            }
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <span class="badge rounded-pill fw-bold" 
+                                      style="color:@cor; background-color:@(cor)20;">
+                                    @c.NumAnuncios artigos
+                                </span>
+                                <i class="bi bi-arrow-right-circle text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .colecao-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.12) !important;
+    }
+</style>

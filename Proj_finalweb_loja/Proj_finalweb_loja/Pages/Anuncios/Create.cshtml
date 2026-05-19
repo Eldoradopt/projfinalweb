@@ -115,6 +115,36 @@
                     </div>
                 </div>
 
+                <!-- 6. Tags -->
+                <div class="mb-4">
+                    <label asp-for="Input.TagsInput" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                    <input asp-for="Input.TagsInput" id="tagsInput" class="form-control py-2" placeholder="Ex: Apple, iPhone, Gaming, Promoção (separadas por vírgula)" style="border-radius: var(--radius-md);" />
+                    <span asp-validation-for="Input.TagsInput" class="text-danger small"></span>
+                    
+                    @if (Model.TodasAsTags != null && Model.TodasAsTags.Any())
+                    {
+                        <div class="mt-2">
+                            <span class="d-block text-muted small mb-2"><i class="bi bi-lightbulb-fill text-warning"></i> Tags existentes (clica para adicionar/remover):</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var tag in Model.TodasAsTags)
+                                {
+                                    <button type="button" class="btn btn-sm btn-light border tag-suggestion-btn py-1 px-3" data-tag-name="@tag.Nome" style="border-radius: 20px; font-size: 0.8rem;">
+                                        @if (tag.EColecaoEspecial)
+                                        {
+                                            <i class="bi bi-@(tag.Icone ?? "star-fill") me-1" style="color: @(tag.CorHex ?? "var(--clr-primary)");"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-tag-fill text-muted me-1"></i>
+                                        }
+                                        @tag.Nome
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
                 <!-- Submit and Cancel Buttons -->
                 <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
                     <a asp-page="/Index" class="btn btn-premium-outline order-2 order-sm-1">
@@ -165,11 +195,32 @@
             }
         });
 
-        function hidePreviewIfEmpty() {
-            if (!fileInput.files[0] && !urlInput.value.trim()) {
-                previewContainer.classList.add('d-none');
-                previewImg.src = '#';
-            }
-        }
+        // Simple JS for Tag suggestions helper
+        const tagsInput = document.getElementById('tagsInput');
+        const suggestionBtns = document.querySelectorAll('.tag-suggestion-btn');
+
+        suggestionBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tagName = this.getAttribute('data-tag-name');
+                let currentVal = tagsInput.value.trim();
+                
+                // Parse existing tags
+                let tags = currentVal ? currentVal.split(',').map(t => t.trim()) : [];
+                
+                // If tag not already in list, add it
+                if (!tags.some(t => t.toLowerCase() === tagName.toLowerCase())) {
+                    tags.push(tagName);
+                    tagsInput.value = tags.join(', ');
+                    this.classList.remove('btn-light');
+                    this.classList.add('btn-primary', 'text-white');
+                } else {
+                    // Remove tag if clicked again (toggle behavior)
+                    tags = tags.filter(t => t.toLowerCase() !== tagName.toLowerCase());
+                    tagsInput.value = tags.join(', ');
+                    this.classList.remove('btn-primary', 'text-white');
+                    this.classList.add('btn-light');
+                }
+            });
+        });
     </script>
 }
