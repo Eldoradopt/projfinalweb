@@ -1,48 +1,160 @@
 ﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
 
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+:root {
+    --primary-emerald: #0b3d24;
+    --emerald-medium: #135835;
+    --emerald-light: #1b7245;
+    --gold-deep: #b89047;
+    --gold-light: #dfba6b;
+    --gold-shimmer: #fbf9f4;
+    --charcoal: #2d312e;
 }
 
+body {
+    background-color: var(--gold-shimmer);
+    color: var(--charcoal);
+    font-family: 'Georgia', serif;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Base Arabesque background pattern overlay on body */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath d='M40 0l40 40-40 40L0 40zM40 10L10 40l30 30 30-30z' fill='%230b3d24' fill-rule='evenodd'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Divine Header Ribbon */
+.top-banner {
+    background: linear-gradient(135deg, var(--primary-emerald), var(--emerald-medium));
+    color: #fbf9f4;
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    border-bottom: 3px solid var(--gold-deep);
+}
+.top-banner .bismillah {
+    font-size: 1.25rem;
+    display: block;
+    margin-bottom: 2px;
+    font-family: 'Times New Roman', serif;
+    color: var(--gold-light);
+}
+
+/* Navigation Custom Elements */
+.navbar-premium {
+    border-bottom: 1px solid rgba(184, 144, 71, 0.2);
+    box-shadow: 0 4px 20px rgba(11, 61, 36, 0.05);
+}
+
+a.navbar-brand-premium {
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
+    color: var(--primary-emerald) !important;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+a.navbar-brand-premium i {
+    color: var(--gold-deep);
+}
+
+.nav-link-premium {
+    color: var(--primary-emerald) !important;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.nav-link-premium:hover {
+    color: var(--gold-deep) !important;
+}
+
+/* Themed Input Fields */
+.search-container {
+    position: relative;
+    max-width: 400px;
+}
+.search-input {
+    border: 1px solid rgba(11, 61, 36, 0.2) !important;
+    padding-left: 2.2rem !important;
+    border-radius: 4px;
+}
+.search-input:focus {
+    border-color: var(--gold-deep) !important;
+    box-shadow: 0 0 0 0.25rem rgba(184, 144, 71, 0.1) !important;
+}
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--emerald-light);
+}
+
+/* Modest & Styled Links/Buttons */
 a {
-  color: #0077cc;
+    color: var(--emerald-medium);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--gold-deep);
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+.btn-premium {
+    color: var(--primary-emerald) !important;
+    background: linear-gradient(135deg, var(--gold-deep), var(--gold-light)) !important;
+    border-color: var(--gold-deep) !important;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(184, 144, 71, 0.2);
+    transition: all 0.2s ease;
 }
-
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+.btn-premium:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(184, 144, 71, 0.35);
 }
 
 .border-top {
-  border-top: 1px solid #e5e5e5;
+    border-top: 1px solid rgba(184, 144, 71, 0.15) !important;
 }
 .border-bottom {
-  border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid rgba(184, 144, 71, 0.15) !important;
 }
 
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+/* High Fidelity Islamic Styled Footer */
+.footer-premium {
+    background-color: var(--primary-emerald);
+    color: #ffffff;
+    border-top: 4px solid var(--gold-deep);
+    padding: 40px 0 20px 0;
+    margin-top: auto;
 }
-
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
+.footer-premium h5, .footer-premium h6 {
+    color: var(--gold-light);
 }
-
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
+.footer-link {
+    color: #d0ded5;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.footer-link:hover {
+    color: var(--gold-light);
+    padding-left: 4px;
+}
+.charity-alert {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px dashed var(--gold-light);
+    border-radius: 4px;
+    padding: 12px;
+}
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 30px;
+    padding-top: 20px;
 }
