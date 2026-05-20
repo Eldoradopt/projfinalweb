@@ -1,0 +1,136 @@
+@page
+@model Proj_finalweb_loja.Pages.Utilizadores.EditarPerfilModel
+@{
+    ViewData["Title"] = "Editar Perfil";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+        <li class="breadcrumb-item"><a asp-page="/Utilizadores/Index" class="text-decoration-none text-muted">Vendedores</a></li>
+        <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Editar Perfil</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow border-0 overflow-hidden" style="border-radius: var(--radius-lg);">
+            <!-- Card Header color band -->
+            <div style="height: 8px; background: linear-gradient(90deg, var(--clr-primary), var(--clr-secondary));"></div>
+            
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                    <div>
+                        <h2 class="fw-bold mb-1 text-dark"><i class="bi bi-pencil-square text-primary"></i> Editar Perfil</h2>
+                        <p class="text-muted mb-0 small">Altera as tuas informações de contacto e foto de perfil.</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row g-4">
+                        <!-- Left column: Profile Picture Upload -->
+                        <div class="col-md-4 text-center border-end pe-md-4">
+                            <h6 class="fw-bold text-uppercase text-muted small mb-3">Foto de Perfil</h6>
+                            
+                            <div class="mb-3 position-relative d-inline-block">
+                                @if (!string.IsNullOrWhiteSpace(Model.FotoAtual))
+                                {
+                                    <img src="@Model.FotoAtual" alt="Foto Atual" id="avatarPreview"
+                                         class="rounded-circle border border-4 border-white shadow-sm img-thumbnail"
+                                         style="width: 140px; height: 140px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div id="avatarPlaceholder" class="rounded-circle border border-4 border-white shadow-sm d-flex align-items-center justify-content-center fw-bold text-white fs-1 mx-auto"
+                                         style="width: 140px; height: 140px; background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));">
+                                        @(!string.IsNullOrWhiteSpace(Model.Input.Nome) ? Model.Input.Nome.Substring(0, 1).ToUpper() : "U")
+                                    </div>
+                                    <img id="avatarPreview" class="rounded-circle border border-4 border-white shadow-sm img-thumbnail d-none"
+                                         style="width: 140px; height: 140px; object-fit: cover;" />
+                                }
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="fotoInput" class="btn btn-premium-outline btn-sm w-100 justify-content-center">
+                                    <i class="bi bi-camera"></i> Escolher Nova Foto
+                                </label>
+                                <input type="file" asp-for="FotoPerfil" id="fotoInput" class="d-none" accept="image/*" onchange="previewImage(this)" />
+                                <span asp-validation-for="FotoPerfil" class="text-danger small d-block mt-1"></span>
+                            </div>
+                            
+                            <p class="text-muted small">Carrega uma foto quadrada de até 5MB nos formatos JPG, PNG ou WEBP.</p>
+                        </div>
+
+                        <!-- Right column: Text Fields -->
+                        <div class="col-md-8 ps-md-4">
+                            <h6 class="fw-bold text-uppercase text-muted small mb-3">Informações Pessoais</h6>
+
+                            <!-- Nome -->
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Nome" class="form-control" placeholder="Teu Nome" />
+                                <label asp-for="Input.Nome"></label>
+                                <span asp-validation-for="Input.Nome" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Telemóvel -->
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Teu Telemóvel" />
+                                <label asp-for="Input.PhoneNumber"></label>
+                                <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Cidade -->
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Cidade" class="form-control" placeholder="Tua Cidade" />
+                                <label asp-for="Input.Cidade"></label>
+                                <span asp-validation-for="Input.Cidade" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Morada -->
+                            <div class="form-floating mb-4">
+                                <input asp-for="Input.Morada" class="form-control" placeholder="Tua Morada" />
+                                <label asp-for="Input.Morada"></label>
+                                <span asp-validation-for="Input.Morada" class="text-danger small"></span>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                <a asp-page="/Utilizadores/Perfil" asp-route-id="@User.Identity.Name" class="btn btn-secondary border-0" style="background: var(--clr-bg-alt); color: var(--clr-text-muted);">
+                                    <i class="bi bi-x"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-premium">
+                                    <i class="bi bi-check-lg"></i> Guardar Alterações
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('avatarPreview');
+                    const placeholder = document.getElementById('avatarPlaceholder');
+                    
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                    
+                    if (placeholder) {
+                        placeholder.classList.add('d-none');
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

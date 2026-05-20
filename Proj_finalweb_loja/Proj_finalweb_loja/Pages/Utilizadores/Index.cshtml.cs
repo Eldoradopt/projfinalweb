@@ -30,9 +30,23 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
         }
 
         public IList<VendedorCard> Vendedores { get; set; } = new List<VendedorCard>();
+        public IList<VendedorCard> Favoritos { get; set; } = new List<VendedorCard>();
+        public IList<VendedorCard> OutrosVendedores { get; set; } = new List<VendedorCard>();
 
         public async Task OnGetAsync()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var favUserIds = new HashSet<string>();
+
+            if (currentUser != null)
+            {
+                var list = await _context.VendedoresFavoritos
+                    .Where(vf => vf.SeguidorFK == currentUser.Id)
+                    .Select(vf => vf.VendedorFK)
+                    .ToListAsync();
+                favUserIds = new HashSet<string>(list);
+            }
+
             var users = await _userManager.Users
                 .Include(u => u.Anuncios)
                 .Include(u => u.AvaliacoesRecebidas)
@@ -48,6 +62,16 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
             })
             .OrderByDescending(v => v.NumAnuncios)
             .ToList();
+
+            if (currentUser != null)
+            {
+                Favoritos = Vendedores.Where(v => favUserIds.Contains(v.Utilizador.Id)).ToList();
+                OutrosVendedores = Vendedores.Where(v => !favUserIds.Contains(v.Utilizador.Id)).ToList();
+            }
+            else
+            {
+                OutrosVendedores = Vendedores;
+            }
         }
     }
 }

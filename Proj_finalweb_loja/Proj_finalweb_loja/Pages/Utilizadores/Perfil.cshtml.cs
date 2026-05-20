@@ -30,6 +30,7 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
         public double MediaAvaliacoes { get; set; }
         public bool JaAvaliou { get; set; } = false;
         public bool IsOwnProfile { get; set; } = false;
+        public bool IsFavorito { get; set; } = false;
 
         [BindProperty]
         public RatingInputModel RatingInput { get; set; } = new();
@@ -87,6 +88,8 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
                 IsOwnProfile = currentUser.Id == id;
                 JaAvaliou = await _context.Avaliacoes
                     .AnyAsync(a => a.AvaliadorFK == currentUser.Id && a.AvaliandoFK == id);
+                IsFavorito = await _context.VendedoresFavoritos
+                    .AnyAsync(vf => vf.SeguidorFK == currentUser.Id && vf.VendedorFK == id);
             }
 
             RatingInput.VendedorId = id;
@@ -133,6 +136,68 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
 
             TempData["SuccessMessage"] = "Avaliação submetida com sucesso!";
             return RedirectToPage("/Utilizadores/Perfil", new { id = RatingInput.VendedorId });
+        }
+
+        public async Task<IActionResult> OnPostToggleFavoritoAsync(string id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+
+            if (currentUser.Id == id)
+            {
+                TempData["ErrorMessage"] = "Não podes adicionar-te a ti mesmo aos favoritos.";
+                return RedirectToPage("/Utilizadores/Perfil", new { id });
+            }
+
+            var favorito = await _context.VendedoresFavoritos
+                .FirstOrDefaultAsync(vf => vf.SeguidorFK == currentUser.Id && vf.VendedorFK == id);
+
+            if (favorito != null)
+            {
+                _context.VendedoresFavoritos.Remove(favorito);
+                TempData["SuccessMessage"] = "Vendedor removido dos favoritos.";
+            }
+            else
+            {
+                var novoFavorito = new VendedorFavorito
+                {
+                    SeguidorFK = currentUser.Id,
+                    VendedorFK = id,
+                    DataAdicionado = DateTime.UtcNow
+                };
+                _context.VendedoresFavoritos.Add(novoFavorito);
+                TempData["SuccessMessage"] = "Vendedor adicionado aos favoritos!";
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToPage("/Utilizadores/Perfil", new { id });
+        }
+
+        public async Task<IActionResult> OnPostRemoverVendaAsync(int anuncioId, string vendedorId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+
+            if (currentUser.Id != vendedorId)
+            {
+                TempData["ErrorMessage"] = "Não tens permissão para remover esta venda.";
+                return RedirectToPage("/Utilizadores/Perfil", new { id = vendedorId });
+            }
+
+            var anuncio = await _context.Anuncios
+                .Include(a => a.Imagens) // include child references if needed
+                .FirstOrDefaultAsync(a => a.Id == anuncioId && a.VendedorFK == vendedorId);
+
+            if (anuncio != null)
+            {
+                _context.Anuncios.Remove(anuncio);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Venda removida com sucesso!";
+            }
+
+            return RedirectToPage("/Utilizadores/Perfil", new { id = vendedorId });
         }
 
         private async Task<IActionResult> ReloadPageAsync(string id)

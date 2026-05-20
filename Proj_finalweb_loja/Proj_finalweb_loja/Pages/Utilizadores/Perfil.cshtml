@@ -35,7 +35,7 @@
         {
             <div class="rounded-circle border border-4 border-white shadow d-flex align-items-center justify-content-center fw-bold text-white"
                  style="width:96px;height:96px;font-size:2rem;background:linear-gradient(135deg,var(--clr-primary),var(--clr-secondary));flex-shrink:0;">
-                @Model.Vendedor.Nome.Substring(0, 1).ToUpper()
+                @(!string.IsNullOrWhiteSpace(Model.Vendedor.Nome) ? Model.Vendedor.Nome.Substring(0, 1).ToUpper() : "U")
             </div>
         }
 
@@ -62,15 +62,35 @@
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="d-flex gap-3 pb-2">
-            <div class="text-center px-3 py-2 bg-light rounded" style="border-radius:var(--radius-md);">
-                <div class="fw-bold text-primary fs-4">@Model.AnunciosAtivos.Count</div>
-                <div class="text-muted" style="font-size:0.75rem;">Anúncios</div>
+        <!-- Stats & Actions -->
+        <div class="d-flex flex-column align-items-md-end gap-2 pb-2">
+            <div class="d-flex gap-3">
+                <div class="text-center px-3 py-2 bg-light rounded" style="border-radius:var(--radius-md);">
+                    <div class="fw-bold text-primary fs-4">@Model.AnunciosAtivos.Count</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Anúncios</div>
+                </div>
+                <div class="text-center px-3 py-2 bg-light rounded" style="border-radius:var(--radius-md);">
+                    <div class="fw-bold text-success fs-4">@Model.VendasConcluidas.Count</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Vendas</div>
+                </div>
             </div>
-            <div class="text-center px-3 py-2 bg-light rounded" style="border-radius:var(--radius-md);">
-                <div class="fw-bold text-success fs-4">@Model.VendasConcluidas.Count</div>
-                <div class="text-muted" style="font-size:0.75rem;">Vendas</div>
+
+            <div class="d-flex gap-2 mt-2 w-100 justify-content-md-end">
+                @if (Model.IsOwnProfile)
+                {
+                    <a asp-page="/Utilizadores/EditarPerfil" class="btn btn-premium btn-sm">
+                        <i class="bi bi-pencil-square"></i> Editar Perfil
+                    </a>
+                }
+                else if (User.Identity.IsAuthenticated)
+                {
+                    <form method="post" asp-page-handler="ToggleFavorito" asp-route-id="@Model.Vendedor.Id">
+                        <button type="submit" class="btn btn-sm @(Model.IsFavorito ? "btn-danger" : "btn-outline-danger")">
+                            <i class="bi @(Model.IsFavorito ? "bi-heart-fill" : "bi-heart")"></i>
+                            @(Model.IsFavorito ? "Remover Favorito" : "Adicionar Favorito")
+                        </button>
+                    </form>
+                }
             </div>
         </div>
     </div>
@@ -116,7 +136,7 @@
         <!-- Completed Sales -->
         @if (Model.VendasConcluidas.Any())
         {
-            <h4 class="fw-bold mb-3"><i class="bi bi-bag-check text-success"></i> Vendas Concluídas</h4>
+            <h4 class="fw-bold mb-3"><i class="bi bi-bag-check text-success"></i> @(Model.IsOwnProfile ? "As Minhas Vendas" : "Vendas Concluídas")</h4>
             <div class="row row-cols-1 row-cols-sm-2 g-3 mb-5">
                 @foreach (var ad in Model.VendasConcluidas)
                 {
@@ -131,7 +151,17 @@
                             <div class="card-body-premium">
                                 <div class="card-category-premium">@ad.Categoria?.Nome</div>
                                 <h5 class="card-title-premium text-muted">@ad.Titulo</h5>
-                                <div class="card-price-premium mt-auto"><span>@ad.Preco.ToString("N2") €</span></div>
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <div class="card-price-premium"><span>@ad.Preco.ToString("N2") €</span></div>
+                                    @if (Model.IsOwnProfile)
+                                    {
+                                        <form method="post" asp-page-handler="RemoverVenda" asp-route-anuncioId="@ad.Id" asp-route-vendedorId="@Model.Vendedor.Id" onsubmit="return confirm('Tens a certeza que desejas remover esta venda do teu registo?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm border-0 py-1 px-2" title="Remover Venda">
+                                                <i class="bi bi-trash"></i> Apagar
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -162,7 +192,7 @@
                             {
                                 <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
                                      style="width:40px;height:40px;font-size:1rem;background:linear-gradient(135deg,var(--clr-primary),var(--clr-secondary));">
-                                    @(av.Avaliador?.Nome.Substring(0, 1).ToUpper() ?? "?")
+                                    @(!string.IsNullOrWhiteSpace(av.Avaliador?.Nome) ? av.Avaliador.Nome.Substring(0, 1).ToUpper() : "U")
                                 </div>
                             }
                             <div class="flex-grow-1">
