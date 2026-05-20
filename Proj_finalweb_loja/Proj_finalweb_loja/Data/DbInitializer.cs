@@ -17,7 +17,7 @@ namespace Proj_finalweb_loja.Data
         /// <summary>
         /// Semeia os dados iniciais da aplicação caso a base de dados se encontre vazia.
         /// </summary>
-        public static async Task SeedDataAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public static async Task SeedDataAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             // 1. Semear Categorias se a tabela estiver vazia
             if (!await context.Categorias.AnyAsync())
@@ -98,9 +98,36 @@ namespace Proj_finalweb_loja.Data
                 await context.SaveChangesAsync();
             }
 
-            // 3. Semear Utilizadores de teste se a tabela estiver vazia
+            // 3. Semear Roles e Utilizadores de teste se a tabela estiver vazia
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+            if (!await roleManager.RoleExistsAsync("Utilizador"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Utilizador"));
+            }
+
             if (!await userManager.Users.AnyAsync())
             {
+                // Criar Administrador
+                var admin = new ApplicationUser
+                {
+                    UserName = "admin@ipt.pt",
+                    Email = "admin@ipt.pt",
+                    Nome = "Administrador do Bazar",
+                    Cidade = "Tomar",
+                    Morada = "Serviços Centrais IPT",
+                    EmailConfirmed = true,
+                    FotoPerfilPath = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
+                    PhoneNumber = "249328100"
+                };
+                var adminResult = await userManager.CreateAsync(admin, "Admin123!");
+                if (adminResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(admin, "Admin");
+                }
+
                 var users = new[]
                 {
                     new ApplicationUser
@@ -140,7 +167,11 @@ namespace Proj_finalweb_loja.Data
 
                 foreach (var user in users)
                 {
-                    await userManager.CreateAsync(user, "Password123!");
+                    var userResult = await userManager.CreateAsync(user, "Password123!");
+                    if (userResult.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(user, "Utilizador");
+                    }
                 }
             }
 

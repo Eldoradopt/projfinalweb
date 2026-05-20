@@ -91,5 +91,11 @@ namespace Proj_finalweb_loja.Data.Model
         /// Coleção de utilizadores que seguem este vendedor.
         /// </summary>
         public virtual ICollection<VendedorFavorito> Seguidores { get; set; } = new List<VendedorFavorito>();
+
+        /// <summary>
+        /// Indica se a conta do utilizador foi marcada como suspeita pela administração.
+        /// </summary>
+        [Display(Name = "Conta Suspeita")]
+        public bool Suspeito { get; set; } = false;
     }
 }

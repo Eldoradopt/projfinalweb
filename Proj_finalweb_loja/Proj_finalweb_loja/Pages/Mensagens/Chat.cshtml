@@ -1,0 +1,164 @@
+@page
+@model Proj_finalweb_loja.Pages.Mensagens.ChatModel
+@{
+    ViewData["Title"] = "Conversa com " + Model.Recipient.Nome;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-9">
+        
+        <!-- Breadcrumb navigation -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Mensagens</a></li>
+                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Conversa</li>
+            </ol>
+        </nav>
+
+        <!-- Chat Frame Container -->
+        <div class="bg-white border border-light shadow-sm" style="border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; min-height: 600px;">
+            
+            <!-- Chat Header (Recipient Details + Back Link) -->
+            <div class="p-3 border-bottom border-light bg-light d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <a asp-page="./Index" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 50%;">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    
+                    @if (!string.IsNullOrWhiteSpace(Model.Recipient.FotoPerfilPath))
+                    {
+                        <img src="@Model.Recipient.FotoPerfilPath" alt="@Model.Recipient.Nome" class="rounded-circle" style="width: 42px; height: 42px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                            @Model.Recipient.Nome.Substring(0, 1).ToUpper()
+                        </div>
+                    }
+                    
+                    <div>
+                        <h5 class="fw-bold mb-0" style="font-size: 1.05rem;">@Model.Recipient.Nome</h5>
+                        <span class="text-muted small"><i class="bi bi-geo-alt"></i> @Model.Recipient.Cidade</span>
+                    </div>
+                </div>
+
+                <!-- Mode Indicator -->
+                @if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    <span class="badge bg-warning-light text-warning px-2.5 py-1.5 small rounded-pill" style="background-color: rgba(245, 158, 11, 0.1); border-radius: var(--radius-sm);">
+                        Modo Demo (João)
+                    </span>
+                }
+            </div>
+
+            <!-- Context Banner (The negotiated Anuncio detail) -->
+            <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                <div class="d-flex align-items-center gap-3">
+                    @{
+                        var adImg = Model.Anuncio.Imagens.FirstOrDefault(i => i.Principal)?.CaminhoFicheiro 
+                                    ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+                    }
+                    <img src="@adImg" alt="@Model.Anuncio.Titulo" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);" />
+                    <div>
+                        <span class="text-muted small d-block">Negociação de:</span>
+                        <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 250px;">@Model.Anuncio.Titulo</h6>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <div class="text-end">
+                        <span class="text-muted small d-block">Preço Pretendido</span>
+                        <h5 class="fw-extrabold mb-0 text-primary" style="font-size: 1.1rem;">@Model.Anuncio.Preco.ToString("N2") €</h5>
+                    </div>
+                    <a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="btn btn-sm btn-premium-outline">
+                        <i class="bi bi-eye"></i> Ver Artigo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages Log (Scrollable) -->
+            <div class="p-4 flex-grow-1" id="chatMessagesContainer" style="background-color: #f8fafc; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 1rem;">
+                @if (!Model.Mensagens.Any())
+                {
+                    <div class="text-center my-auto py-5 text-muted">
+                        <i class="bi bi-chat-heart fs-1 text-primary mb-2 d-block" style="opacity: 0.4;"></i>
+                        <h6 class="fw-bold mb-1">Começa a negociar!</h6>
+                        <p class="text-muted small mb-0">Envia a primeira mensagem para propor uma oferta ou tirar dúvidas.</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var msg in Model.Mensagens)
+                    {
+                        bool isOutgoing = msg.RemetenteFK == Model.CurrentUser.Id;
+                        
+                        <div class="d-flex flex-column @(isOutgoing ? "align-items-end" : "align-items-start")">
+                            <!-- Chat bubble -->
+                            <div class="p-3 shadow-sm" style="max-width: 75%; border-radius: @(isOutgoing ? "18px 18px 0px 18px" : "18px 18px 18px 0px"); 
+                                 background: @(isOutgoing ? "linear-gradient(135deg, var(--clr-primary), var(--clr-secondary))" : "#ffffff"); 
+                                 color: @(isOutgoing ? "#ffffff" : "var(--clr-text-main)");
+                                 border: @(isOutgoing ? "none" : "1px solid var(--clr-border)");">
+                                <p class="mb-0 text-break small">@msg.Conteudo</p>
+                            </div>
+                            
+                            <!-- Timestamp & Status -->
+                            <div class="mt-1 d-flex align-items-center gap-1 text-muted" style="font-size: 0.7rem;">
+                                <span>@msg.DataEnvio.ToString("dd/MM HH:mm")</span>
+                                @if (isOutgoing)
+                                {
+                                    @if (msg.Lida)
+                                    {
+                                        <i class="bi bi-check-all text-primary fw-bold" title="Lida"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check text-muted" title="Enviada"></i>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Chat Send Input Form -->
+            <div class="p-3 border-top bg-light">
+                <form method="post" class="needs-validation" novalidate id="chatForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                    <input type="hidden" asp-for="AnuncioId" />
+                    <input type="hidden" asp-for="RecipientId" />
+                    
+                    <div class="input-group">
+                        <input asp-for="NovoConteudo" class="form-control py-2.5 border-end-0" placeholder="Escreve uma mensagem..." autocomplete="off" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--clr-border);" id="chatMessageInput" required />
+                        <button type="submit" class="btn btn-premium px-4" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="NovoConteudo" class="text-danger small mt-1 d-block"></span>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Automatic Chat Scroll down to bottom
+        window.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('chatMessagesContainer');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+            
+            // Focus on message input automatically
+            const input = document.getElementById('chatMessageInput');
+            if (input) {
+                input.focus();
+            }
+        });
+    </script>
+}

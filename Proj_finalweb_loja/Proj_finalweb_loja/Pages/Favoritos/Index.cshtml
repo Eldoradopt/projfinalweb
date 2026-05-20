@@ -1,0 +1,106 @@
+@page
+@model Proj_finalweb_loja.Pages.Favoritos.IndexModel
+@{
+    ViewData["Title"] = "Os Meus Favoritos";
+}
+
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Favoritos</li>
+            </ol>
+        </nav>
+        <h1 class="fw-extrabold h2 mb-1">Artigos Guardados</h1>
+        <p class="text-muted small mb-0">Encontra aqui todos os anúncios que guardaste para consultar ou comprar mais tarde.</p>
+    </div>
+
+    <!-- Mode Warning -->
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <div class="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4" style="background-color: var(--clr-primary-light); color: var(--clr-primary) !important; border-radius: var(--radius-md);">
+            <i class="bi bi-info-circle-fill fs-4" style="color: var(--clr-primary);"></i>
+            <div class="text-dark">
+                <strong>Modo de Demonstração Ativo:</strong> Estás a consultar os favoritos do utilizador de teste <strong>João Pereira</strong>. Inicia sessão para veres os teus favoritos pessoais!
+            </div>
+        </div>
+    }
+
+    <!-- Notifications -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-3 mb-4" role="alert" style="border-radius: var(--radius-md);">
+            <i class="bi bi-check-circle-fill fs-4 text-success"></i>
+            <div>@TempData["SuccessMessage"]</div>
+        </div>
+    }
+
+    <!-- Grid Layout -->
+    @if (!Model.MeusFavoritos.Any())
+    {
+        <div class="bg-white border border-light p-5 text-center text-muted shadow-sm my-4" style="border-radius: var(--radius-lg);">
+            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3 text-primary" style="width: 80px; height: 80px;">
+                <i class="bi bi-heart-broken fs-1 text-primary" style="opacity: 0.5;"></i>
+            </div>
+            <h4 class="fw-bold text-dark mb-1">Lista de Favoritos Vazia</h4>
+            <p class="small text-muted mb-4">Ainda não guardaste nenhum artigo. Explora as novidades do BazarIPT e guarda os que mais gostas!</p>
+            <a asp-page="/Anuncios/Index" class="btn btn-premium">
+                <i class="bi bi-search"></i> Explorar Artigos
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var fav in Model.MeusFavoritos)
+            {
+                var ad = fav.Anuncio;
+                if (ad != null)
+                {
+                    var principalImg = ad.Imagens.FirstOrDefault(i => i.Principal)?.CaminhoFicheiro 
+                                       ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+
+                    <div class="col">
+                        <div class="card-premium position-relative">
+                            
+                            <!-- Remove Favorite form button -->
+                            <form method="post" asp-page-handler="Remove" asp-route-anuncioId="@ad.Id" class="position-absolute" style="top: 0.75rem; right: 0.75rem; z-index: 10;">
+                                <button type="submit" class="btn-favorite-badge shadow-sm" style="color: var(--clr-danger);" title="Remover dos favoritos">
+                                    <i class="bi bi-heart-fill"></i>
+                                </button>
+                            </form>
+
+                            <div class="card-img-container">
+                                <span class="badge-premium">@ad.EstadoProduto.ToString()</span>
+                                <img src="@principalImg" alt="@ad.Titulo" class="card-img-premium" />
+                            </div>
+
+                            <div class="card-body-premium">
+                                <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                                <h5 class="card-title-premium">
+                                    <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark hover-primary">
+                                        @ad.Titulo
+                                    </a>
+                                </h5>
+                                <div class="card-price-premium mt-auto">
+                                    <span>@ad.Preco.ToString("N2") €</span>
+                                </div>
+                            </div>
+
+                            <div class="card-footer-premium">
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-geo-alt"></i> @ad.Vendedor?.Cidade
+                                </span>
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-clock"></i> @ad.DataPublicacao.ToString("dd/MM")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,481 @@
+@page
+@model Proj_finalweb_loja.Pages.Admin.ModeracaoModel
+@{
+    ViewData["Title"] = "Moderação da Administração";
+}
+
+<div class="container py-4">
+    <!-- Header Hero Banner (Glassmorphism) -->
+    <div class="hero-premium py-4 px-4 mb-4" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.06) 0%, rgba(14, 165, 233, 0.06) 100%); border: 1px solid rgba(79, 70, 229, 0.15);">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <span class="badge bg-danger-light text-danger mb-3 px-3 py-2 fs-7 fw-semibold rounded-pill" style="background-color: rgba(239, 68, 68, 0.08); color: var(--clr-danger) !important; border: 1px solid rgba(239, 68, 68, 0.15);">
+                    <i class="bi bi-shield-lock-fill"></i> Painel de Controlo de Administração
+                </span>
+                <h1 class="display-6 fw-extrabold mb-2 text-dark">
+                    Moderação e Segurança
+                </h1>
+                <p class="text-muted mb-0">
+                    Gerir contas de utilizadores do marketplace, marcar contas suspeitas de burla e remover com segurança anúncios que violem os regulamentos da comunidade do BazarIPT.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-inline-flex flex-column align-items-md-end">
+                    <span class="text-muted small">Base de Dados Local</span>
+                    <span class="fw-bold text-dark"><i class="bi bi-database"></i> SQL Server Ativo</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-3 mb-4 py-3" style="background-color: rgba(16, 185, 129, 0.12); color: var(--clr-success); border-radius: var(--radius-md); border-left: 5px solid var(--clr-success) !important;" role="alert">
+            <i class="bi bi-check-circle-fill fs-4"></i>
+            <div>
+                @TempData["SuccessMessage"]
+            </div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Fechar" style="filter: invert(41%) sepia(85%) saturate(1523%) hue-rotate(134deg) brightness(97%) contrast(92%);"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center gap-3 mb-4 py-3" style="background-color: rgba(239, 68, 68, 0.12); color: var(--clr-danger); border-radius: var(--radius-md); border-left: 5px solid var(--clr-danger) !important;" role="alert">
+            <i class="bi bi-exclamation-octagon-fill fs-4"></i>
+            <div>
+                @TempData["ErrorMessage"]
+            </div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Fechar" style="filter: invert(36%) sepia(91%) saturate(3085%) hue-rotate(345deg) brightness(99%) contrast(93%);"></button>
+        </div>
+    }
+
+    <!-- Admin Demo Notification -->
+    @if (Model.IsAdminDemo)
+    {
+        <div class="admin-demo-banner p-3 mb-4 d-flex align-items-center gap-3 shadow-sm">
+            <div class="rounded-circle bg-warning bg-opacity-25 p-2 text-warning">
+                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-1" style="color: #92400e;">Modo Admin Demo Ativo</h6>
+                <p class="small mb-0 opacity-90 text-dark">
+                    Uma vez que não tem sessão iniciada, a plataforma ativou o <strong>Modo Demo</strong>. Poderá testar todos os botões e submeter os formulários, simulando as ações administrativas em tempo real no banco de dados.
+                </p>
+            </div>
+        </div>
+    }
+
+    <!-- Tab Navigation Buttons -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <ul class="nav nav-pills gap-2" id="moderationTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link tab-pill-premium active" id="users-tab" data-bs-toggle="pill" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">
+                    <i class="bi bi-people-fill"></i> Contas de Utilizadores (@Model.Utilizadores.Count)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link tab-pill-premium" id="ads-tab" data-bs-toggle="pill" data-bs-target="#ads" type="button" role="tab" aria-controls="ads" aria-selected="false">
+                    <i class="bi bi-grid-3x3-gap-fill"></i> Artigos Publicados (@Model.Anuncios.Count)
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="moderationTabsContent">
+        
+        <!-- Tab 1: Utilizadores -->
+        <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+            <div class="glass-panel">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1 text-dark">Lista de Vendedores</h4>
+                        <p class="text-muted small mb-0">Controlo de perfis, suspensões e eliminação permanente de contas associadas.</p>
+                    </div>
+                    <div class="search-container" style="max-width: 350px;">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="utilizadorSearch" class="form-control search-input" placeholder="Filtrar por nome, email ou cidade..." onkeyup="filterUtilizadores()">
+                    </div>
+                </div>
+
+                @if (!Model.Utilizadores.Any())
+                {
+                    <div class="text-center py-5 text-muted bg-light bg-opacity-50 rounded" style="border: 1px dashed var(--clr-border);">
+                        <i class="bi bi-people fs-1 mb-3 text-muted"></i>
+                        <h5 class="fw-bold">Nenhum utilizador encontrado</h5>
+                        <p class="small mb-0">Não foram encontrados outros utilizadores além do administrador do sistema no banco de dados.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-premium-moderation align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Utilizador</th>
+                                    <th>Email / Contacto</th>
+                                    <th>Cidade</th>
+                                    <th class="text-center">Artigos</th>
+                                    <th>Estado de Segurança</th>
+                                    <th class="text-end">Ações Administrativas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="utilizadoresTableBody">
+                                @foreach (var u in Model.Utilizadores)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 42px; height: 42px; color: var(--clr-primary);">
+                                                    <i class="bi bi-person-fill fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark">@u.Nome</div>
+                                                    <span class="text-muted fs-8">ID: @u.Id.Substring(0, Math.Min(u.Id.Length, 8))...</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">@u.Email</div>
+                                            @if (!string.IsNullOrEmpty(u.PhoneNumber))
+                                            {
+                                                <div class="text-muted small"><i class="bi bi-telephone"></i> @u.PhoneNumber</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="text-muted small font-italic"><i class="bi bi-telephone"></i> Sem telefone</div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border"><i class="bi bi-geo-alt"></i> @(string.IsNullOrEmpty(u.Cidade) ? "Tomar (Campus)" : u.Cidade)</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-indigo-light text-primary fw-bold px-2 py-1 rounded-pill" style="background-color: var(--clr-primary-light); color: var(--clr-primary) !important;">
+                                                @u.Anuncios.Count
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (u.Suspeito)
+                                            {
+                                                <span class="badge moderation-badge-suspeito px-3 py-2 rounded-pill d-inline-flex align-items-center gap-1">
+                                                    <i class="bi bi-shield-slash-fill"></i> Suspeito / Bloqueado
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge moderation-badge-seguro px-3 py-2 rounded-pill d-inline-flex align-items-center gap-1">
+                                                    <i class="bi bi-shield-check"></i> Ativo / Confiável
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-inline-flex gap-2">
+                                                <!-- Toggle Suspeito Form -->
+                                                <form method="post" asp-page-handler="ToggleSuspeito" style="display:inline;">
+                                                    <input type="hidden" name="userId" value="@u.Id" />
+                                                    @if (u.Suspeito)
+                                                    {
+                                                        <button type="submit" class="btn btn-outline-success btn-sm px-3 d-inline-flex align-items-center gap-1" title="Remover suspeita e restaurar conta">
+                                                            <i class="bi bi-shield-check"></i> Reativar
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="submit" class="btn btn-outline-warning btn-sm px-3 d-inline-flex align-items-center gap-1" title="Marcar conta como fraudulenta ou suspeita">
+                                                            <i class="bi bi-shield-exclamation"></i> Flag Suspeito
+                                                        </button>
+                                                    }
+                                                </form>
+
+                                                <!-- Delete User Form with double confirmation -->
+                                                <form method="post" asp-page-handler="RemoverConta" style="display:inline;" onsubmit="return confirmDeleteUser('@u.Nome', @u.Anuncios.Count);">
+                                                    <input type="hidden" name="userId" value="@u.Id" />
+                                                    <button type="submit" class="btn btn-danger btn-sm px-3 d-inline-flex align-items-center gap-1" title="Eliminar conta e todos os dados associados">
+                                                        <i class="bi bi-trash3"></i> Eliminar
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Tab 2: Artigos Publicados -->
+        <div class="tab-pane fade" id="ads" role="tabpanel" aria-labelledby="ads-tab">
+            <div class="glass-panel">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1 text-dark">Artigos à Venda</h4>
+                        <p class="text-muted small mb-0">Remover anúncios irregulares, inapropriados ou marcados como fraudulentos.</p>
+                    </div>
+                    <div class="search-container" style="max-width: 350px;">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="anuncioSearch" class="form-control search-input" placeholder="Filtrar por título, vendedor, categoria..." onkeyup="filterAnuncios()">
+                    </div>
+                </div>
+
+                @if (!Model.Anuncios.Any())
+                {
+                    <div class="text-center py-5 text-muted bg-light bg-opacity-50 rounded" style="border: 1px dashed var(--clr-border);">
+                        <i class="bi bi-grid-3x3-gap fs-1 mb-3 text-muted"></i>
+                        <h5 class="fw-bold">Nenhum anúncio publicado</h5>
+                        <p class="small mb-0">Ainda não existem anúncios publicados na base de dados.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-premium-moderation align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Imagem</th>
+                                    <th>Artigo</th>
+                                    <th>Vendedor / Conta</th>
+                                    <th>Categoria</th>
+                                    <th>Preço</th>
+                                    <th>Data de Criação</th>
+                                    <th class="text-end">Ações Administrativas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="anunciosTableBody">
+                                @foreach (var ad in Model.Anuncios)
+                                {
+                                    var principalImg = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
+                                    var imgSrc = principalImg != null ? principalImg.CaminhoFicheiro : "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=200&q=80";
+                                    var isSuspiciousSeller = ad.Vendedor != null && ad.Vendedor.Suspeito;
+
+                                    <tr style="@(isSuspiciousSeller ? "background-color: rgba(239, 68, 68, 0.03);" : "")">
+                                        <td>
+                                            <img src="@imgSrc" alt="@ad.Titulo" class="ad-thumbnail-moderation" onerror="this.src='https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=200&q=80'" />
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-dark">@ad.Titulo</div>
+                                            <div class="text-muted small">Estado: @ad.Estado.ToString() | Condição: @ad.EstadoProduto.ToString()</div>
+                                            @if (isSuspiciousSeller)
+                                            {
+                                                <span class="badge bg-danger-light text-danger fs-8 mt-1"><i class="bi bi-exclamation-triangle"></i> Vendedor Suspeito</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">@(ad.Vendedor?.Nome ?? "Utilizador Anónimo")</div>
+                                            <div class="text-muted small">@ad.Vendedor?.Email</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-primary border border-primary border-opacity-10">
+                                                <i class="bi bi-tag"></i> @(ad.Categoria?.Nome ?? "Geral")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-primary">@ad.Preco.ToString("C")</div>
+                                        </td>
+                                        <td>
+                                            <div class="text-muted small">@ad.DataPublicacao.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                                        </td>
+                                        <td class="text-end">
+                                            <!-- Delete Product Form with confirmation -->
+                                            <form method="post" asp-page-handler="RemoverProduto" style="display:inline;" onsubmit="return confirmDeleteProduct('@ad.Titulo');">
+                                                <input type="hidden" name="anuncioId" value="@ad.Id" />
+                                                <button type="submit" class="btn btn-danger btn-sm px-3 d-inline-flex align-items-center gap-1" title="Eliminar este anúncio permanentemente">
+                                                    <i class="bi bi-trash3"></i> Eliminar Artigo
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Premium Glassmorphic Styles tailored for BazarIPT styling */
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-premium);
+        padding: 2.2rem;
+        transition: var(--transition);
+    }
+    
+    .table-premium-moderation {
+        width: 100%;
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+    
+    .table-premium-moderation th {
+        font-weight: 700;
+        color: var(--clr-text-main);
+        border-bottom: 2px solid var(--clr-border);
+        padding: 1.1rem 0.85rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .table-premium-moderation td {
+        padding: 1.15rem 0.85rem;
+        border-bottom: 1px solid var(--clr-border);
+        font-size: 0.95rem;
+        color: var(--clr-text-main);
+    }
+    
+    .table-premium-moderation tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .table-premium-moderation tr {
+        transition: var(--transition);
+    }
+    
+    .table-premium-moderation tr:hover {
+        background-color: rgba(79, 70, 229, 0.02);
+    }
+    
+    .moderation-badge-suspeito {
+        background-color: rgba(239, 68, 68, 0.1) !important;
+        color: var(--clr-danger) !important;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+    
+    .moderation-badge-seguro {
+        background-color: rgba(16, 185, 129, 0.1) !important;
+        color: var(--clr-success) !important;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    .admin-demo-banner {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.09) 0%, rgba(245, 158, 11, 0.04) 100%);
+        border: 1px dashed var(--clr-warning);
+        border-radius: var(--radius-md);
+        color: #92400e;
+        transition: var(--transition);
+    }
+    
+    .tab-pill-premium {
+        font-weight: 600;
+        border-radius: var(--radius-md) !important;
+        padding: 0.75rem 1.5rem !important;
+        border: 1px solid transparent !important;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .tab-pill-premium.active {
+        background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary)) !important;
+        color: white !important;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .tab-pill-premium:not(.active) {
+        background-color: white !important;
+        color: var(--clr-text-muted) !important;
+        border: 1px solid var(--clr-border) !important;
+    }
+    
+    .tab-pill-premium:not(.active):hover {
+        background-color: var(--clr-primary-light) !important;
+        color: var(--clr-primary) !important;
+        border-color: rgba(79, 70, 229, 0.2) !important;
+    }
+    
+    .ad-thumbnail-moderation {
+        width: 54px;
+        height: 54px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--clr-border);
+        transition: var(--transition);
+    }
+    
+    .ad-thumbnail-moderation:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .bg-danger-light {
+        background-color: rgba(239, 68, 68, 0.08);
+    }
+    
+    .fs-8 {
+        font-size: 0.78rem;
+    }
+</style>
+
+@section Scripts {
+    <script type="text/javascript">
+        // Real-time client-side search filtering for accounts
+        function filterUtilizadores() {
+            var input = document.getElementById("utilizadorSearch");
+            var filter = input.value.toLowerCase().trim();
+            var rows = document.querySelectorAll("#utilizadoresTableBody tr");
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                if (text.indexOf(filter) > -1) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        // Real-time client-side search filtering for advertisements
+        function filterAnuncios() {
+            var input = document.getElementById("anuncioSearch");
+            var filter = input.value.toLowerCase().trim();
+            var rows = document.querySelectorAll("#anunciosTableBody tr");
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                if (text.indexOf(filter) > -1) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        // Double confirmation for deleting a user account
+        function confirmDeleteUser(userName, adsCount) {
+            var message = "⚠️ ATENÇÃO: Está prestes a ELIMINAR PERMANENTEMENTE a conta do utilizador '" + userName + "'.\n\n" +
+                          "Isto removerá:\n" +
+                          "- O perfil e credenciais do utilizador\n" +
+                          "- Todos os " + adsCount + " anúncios publicados por ele\n" +
+                          "- Todas as mensagens de chat e fotos associadas\n" +
+                          "- Todas as avaliações dadas ou recebidas por este perfil\n\n" +
+                          "Esta ação é irreversível e afetará a base de dados em definitivo!\n\n" +
+                          "Tem a certeza absoluta de que deseja continuar?";
+            
+            if (confirm(message)) {
+                return confirm("⚠️ ÚLTIMA CONFIRMAÇÃO:\n\nConfirmar eliminação de '" + userName + "'?");
+            }
+            return false;
+        }
+
+        // Confirmation for deleting a product listing
+        function confirmDeleteProduct(productTitle) {
+            return confirm("Tem a certeza absoluta de que deseja eliminar permanentemente o anúncio:\n\n\"" + productTitle + "\"?\n\nEsta ação não poderá ser desfeita!");
+        }
+    </script>
+}

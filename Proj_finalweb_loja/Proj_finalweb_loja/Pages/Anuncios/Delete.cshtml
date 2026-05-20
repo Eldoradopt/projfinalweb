@@ -1,0 +1,70 @@
+@page
+@model Proj_finalweb_loja.Pages.Anuncios.DeleteModel
+@{
+    ViewData["Title"] = "Eliminar Anúncio";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <!-- Breadcrumb navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Anuncios/Index" class="text-decoration-none text-muted">Artigos</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="text-decoration-none text-muted">@Model.Anuncio.Titulo</a></li>
+                <li class="breadcrumb-item active fw-bold text-danger" aria-current="page">Eliminar</li>
+            </ol>
+        </nav>
+
+        <!-- Card Danger Container -->
+        <div class="bg-white border border-light p-4 p-md-5 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-danger rounded-circle p-3 text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="bi bi-exclamation-triangle fs-2"></i>
+                </div>
+                <div>
+                    <h1 class="fw-extrabold h3 mb-1 text-danger">Eliminar Anúncio?</h1>
+                    <p class="text-muted small mb-0">Tens a certeza que pretendes remover este artigo do Bazar? Esta ação é irreversível.</p>
+                </div>
+            </div>
+
+            <!-- Warning Callout -->
+            <div class="alert alert-danger border-0 d-flex gap-3 mb-4 align-items-center" style="border-radius: var(--radius-md);">
+                <i class="bi bi-shield-slash fs-3"></i>
+                <div>
+                    <strong>Atenção:</strong> Ao eliminar o anúncio, todas as fotografias e mensagens associadas serão permanentemente removidas do nosso sistema.
+                </div>
+            </div>
+
+            <!-- Ad Preview Card -->
+            <div class="card border border-light bg-light p-3 mb-4 d-flex flex-row align-items-center gap-3" style="border-radius: var(--radius-md);">
+                @{
+                    var principalImg = Model.Anuncio.Imagens.FirstOrDefault(i => i.Principal)?.CaminhoFicheiro 
+                                       ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+                }
+                <img src="@principalImg" alt="Miniatura do Artigo" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-sm);" />
+                
+                <div>
+                    <span class="badge bg-secondary mb-1" style="font-size: 0.75rem;">@Model.Anuncio.Categoria?.Nome</span>
+                    <h5 class="fw-bold mb-1">@Model.Anuncio.Titulo</h5>
+                    <div class="h4 fw-extrabold mb-0" style="color: var(--clr-primary);">@Model.Anuncio.Preco.ToString("C")</div>
+                </div>
+            </div>
+
+            <!-- Delete Form -->
+            <form method="post">
+                <input type="hidden" asp-for="Anuncio.Id" />
+                
+                <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
+                    <a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="btn btn-premium-outline order-2 order-sm-1">
+                        <i class="bi bi-x-circle"></i> Cancelar e Voltar
+                    </a>
+                    
+                    <button type="submit" class="btn btn-danger order-1 order-sm-2 py-2 px-4 fw-bold text-white d-inline-flex align-items-center gap-2" style="border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: none;">
+                        <i class="bi bi-trash"></i> Sim, Eliminar Anúncio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
