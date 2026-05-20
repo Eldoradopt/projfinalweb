@@ -173,5 +173,10 @@ namespace Proj_finalweb_loja.Data.Model
         /// Lista de favoritos em que este anúncio está inserido.
         /// </summary>
         public virtual ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
+
+        /// <summary>
+        /// Lista de tags associadas a este anúncio (relação Many-to-Many via AnuncioTag).
+        /// </summary>
+        public virtual ICollection<AnuncioTag> AnuncioTags { get; set; } = new List<AnuncioTag>();
     }
 }

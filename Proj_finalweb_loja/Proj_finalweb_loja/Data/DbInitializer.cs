@@ -10,15 +10,13 @@ namespace Proj_finalweb_loja.Data
 {
     /// <summary>
     /// Classe responsável pela inicialização e povoamento (seeding) da base de dados.
-    /// Cria as categorias padrão, utilizadores de demonstração e anúncios de teste.
+    /// Cria as categorias padrão, utilizadores de demonstração, anúncios de teste e tags/coleções.
     /// </summary>
     public static class DbInitializer
     {
         /// <summary>
         /// Semeia os dados iniciais da aplicação caso a base de dados se encontre vazia.
         /// </summary>
-        /// <param name="context">O contexto da base de dados da aplicação.</param>
-        /// <param name="userManager">O gestor de utilizadores do ASP.NET Identity.</param>
         public static async Task SeedDataAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             // 1. Semear Categorias se a tabela estiver vazia
@@ -68,7 +66,39 @@ namespace Proj_finalweb_loja.Data
                 await context.SaveChangesAsync();
             }
 
-            // 2. Semear Utilizadores de teste se a tabela estiver vazia
+            // 2. Semear Tags e Coleções Especiais
+            if (!await context.Tags.AnyAsync())
+            {
+                var tags = new[]
+                {
+                    // Coleções Especiais (EColecaoEspecial = true)
+                    new Tag { Nome = "iPhone 13", EColecaoEspecial = true, Icone = "phone-fill", CorHex = "#6366f1", Descricao = "Todos os iPhone 13, 13 Pro e 13 Pro Max disponíveis no BazarIPT." },
+                    new Tag { Nome = "iPhone 14", EColecaoEspecial = true, Icone = "phone-fill", CorHex = "#8b5cf6", Descricao = "Encontra o teu iPhone 14 ou 14 Pro a preços imbatíveis." },
+                    new Tag { Nome = "iPhone 15", EColecaoEspecial = true, Icone = "phone-fill", CorHex = "#a855f7", Descricao = "A linha mais recente da Apple a preços de segunda mão." },
+                    new Tag { Nome = "MacBook", EColecaoEspecial = true, Icone = "laptop-fill", CorHex = "#0ea5e9", Descricao = "MacBook Air e MacBook Pro de todas as gerações." },
+                    new Tag { Nome = "PS5", EColecaoEspecial = true, Icone = "controller", CorHex = "#2563eb", Descricao = "PlayStation 5 — consola, comandos e acessórios." },
+                    new Tag { Nome = "Nintendo Switch", EColecaoEspecial = true, Icone = "joystick-fill", CorHex = "#ef4444", Descricao = "Nintendo Switch, Switch Lite e Switch OLED." },
+                    new Tag { Nome = "AirPods", EColecaoEspecial = true, Icone = "headphones", CorHex = "#14b8a6", Descricao = "AirPods de todas as gerações e AirPods Pro." },
+                    new Tag { Nome = "Samsung Galaxy", EColecaoEspecial = true, Icone = "phone", CorHex = "#f59e0b", Descricao = "Toda a linha Samsung Galaxy S, A e Z." },
+
+                    // Tags normais
+                    new Tag { Nome = "Apple", EColecaoEspecial = false },
+                    new Tag { Nome = "Samsung", EColecaoEspecial = false },
+                    new Tag { Nome = "Vintage", EColecaoEspecial = false },
+                    new Tag { Nome = "Nike", EColecaoEspecial = false },
+                    new Tag { Nome = "Adidas", EColecaoEspecial = false },
+                    new Tag { Nome = "Gaming", EColecaoEspecial = false },
+                    new Tag { Nome = "Montanha", EColecaoEspecial = false },
+                    new Tag { Nome = "Caixa Original", EColecaoEspecial = false },
+                    new Tag { Nome = "Urgente", EColecaoEspecial = false },
+                    new Tag { Nome = "Troca Aceite", EColecaoEspecial = false },
+                };
+
+                await context.Tags.AddRangeAsync(tags);
+                await context.SaveChangesAsync();
+            }
+
+            // 3. Semear Utilizadores de teste se a tabela estiver vazia
             if (!await userManager.Users.AnyAsync())
             {
                 var users = new[]
@@ -114,7 +144,7 @@ namespace Proj_finalweb_loja.Data
                 }
             }
 
-            // 3. Semear Anúncios de demonstração se a tabela estiver vazia
+            // 4. Semear Anúncios de demonstração se a tabela estiver vazia
             if (!await context.Anuncios.AnyAsync())
             {
                 var sellerJoao = await userManager.FindByEmailAsync("joao@ipt.pt");
@@ -210,6 +240,72 @@ namespace Proj_finalweb_loja.Data
 
                     await context.Anuncios.AddRangeAsync(ads);
                     await context.SaveChangesAsync();
+
+                    // 5. Associar Tags aos anúncios de seed
+                    var tagIphone13 = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "iPhone 13");
+                    var tagMacBook = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "MacBook");
+                    var tagPS5 = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "PS5");
+                    var tagApple = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "Apple");
+                    var tagVintage = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "Vintage");
+                    var tagGaming = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "Gaming");
+                    var tagCaixaOriginal = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "Caixa Original");
+                    var tagMontanha = await context.Tags.FirstOrDefaultAsync(t => t.Nome == "Montanha");
+
+                    var anuncioIphone = await context.Anuncios.FirstOrDefaultAsync(a => a.Titulo.Contains("iPhone 13"));
+                    var anuncioMac = await context.Anuncios.FirstOrDefaultAsync(a => a.Titulo.Contains("MacBook"));
+                    var anuncioPS5 = await context.Anuncios.FirstOrDefaultAsync(a => a.Titulo.Contains("PlayStation"));
+                    var anuncioCasaco = await context.Anuncios.FirstOrDefaultAsync(a => a.Titulo.Contains("Casaco"));
+                    var anuncioBici = await context.Anuncios.FirstOrDefaultAsync(a => a.Titulo.Contains("Bicicleta"));
+
+                    var anuncioTags = new List<AnuncioTag>();
+
+                    if (anuncioIphone != null)
+                    {
+                        if (tagIphone13 != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioIphone.Id, TagFK = tagIphone13.Id });
+                        if (tagApple != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioIphone.Id, TagFK = tagApple.Id });
+                        if (tagCaixaOriginal != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioIphone.Id, TagFK = tagCaixaOriginal.Id });
+                    }
+                    if (anuncioMac != null)
+                    {
+                        if (tagMacBook != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioMac.Id, TagFK = tagMacBook.Id });
+                        if (tagApple != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioMac.Id, TagFK = tagApple.Id });
+                    }
+                    if (anuncioPS5 != null)
+                    {
+                        if (tagPS5 != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioPS5.Id, TagFK = tagPS5.Id });
+                        if (tagGaming != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioPS5.Id, TagFK = tagGaming.Id });
+                    }
+                    if (anuncioCasaco != null)
+                    {
+                        if (tagVintage != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioCasaco.Id, TagFK = tagVintage.Id });
+                    }
+                    if (anuncioBici != null)
+                    {
+                        if (tagMontanha != null) anuncioTags.Add(new AnuncioTag { AnuncioFK = anuncioBici.Id, TagFK = tagMontanha.Id });
+                    }
+
+                    if (anuncioTags.Any())
+                    {
+                        await context.AnuncioTags.AddRangeAsync(anuncioTags);
+                        await context.SaveChangesAsync();
+                    }
+
+                    // 6. Seed some demo ratings
+                    var avaliacoes = new List<Avaliacao>();
+                    if (sellerJoao != null && sellerMaria != null && sellerDemo != null)
+                    {
+                        avaliacoes.Add(new Avaliacao { Nota = 5, Comentario = "Vendedor fantástico, muito atencioso e rápido na entrega!", AvaliadorFK = sellerMaria.Id, AvaliandoFK = sellerJoao.Id, DataAvaliacao = DateTime.UtcNow.AddDays(-2) });
+                        avaliacoes.Add(new Avaliacao { Nota = 4, Comentario = "Boa experiência, artigo tal como descrito.", AvaliadorFK = sellerDemo.Id, AvaliandoFK = sellerJoao.Id, DataAvaliacao = DateTime.UtcNow.AddDays(-1) });
+                        avaliacoes.Add(new Avaliacao { Nota = 5, Comentario = "Excelente vendedora, muito simpática!", AvaliadorFK = sellerJoao.Id, AvaliandoFK = sellerMaria.Id, DataAvaliacao = DateTime.UtcNow.AddDays(-3) });
+                        avaliacoes.Add(new Avaliacao { Nota = 5, Comentario = "Muito profissional e honesto.", AvaliadorFK = sellerJoao.Id, AvaliandoFK = sellerDemo.Id, DataAvaliacao = DateTime.UtcNow.AddDays(-4) });
+                        avaliacoes.Add(new Avaliacao { Nota = 3, Comentario = "Demorou um pouco mas o produto chegou em perfeitas condições.", AvaliadorFK = sellerMaria.Id, AvaliandoFK = sellerDemo.Id, DataAvaliacao = DateTime.UtcNow.AddDays(-5) });
+                    }
+
+                    if (avaliacoes.Any())
+                    {
+                        await context.Avaliacoes.AddRangeAsync(avaliacoes);
+                        await context.SaveChangesAsync();
+                    }
                 }
             }
         }

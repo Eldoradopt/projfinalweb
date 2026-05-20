@@ -81,5 +81,15 @@ namespace Proj_finalweb_loja.Data.Model
         /// Coleção de anúncios marcados como favoritos por este utilizador.
         /// </summary>
         public virtual ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
+
+        /// <summary>
+        /// Coleção de vendedores que este utilizador segue/marcou como favoritos.
+        /// </summary>
+        public virtual ICollection<VendedorFavorito> VendedoresFavoritos { get; set; } = new List<VendedorFavorito>();
+
+        /// <summary>
+        /// Coleção de utilizadores que seguem este vendedor.
+        /// </summary>
+        public virtual ICollection<VendedorFavorito> Seguidores { get; set; } = new List<VendedorFavorito>();
     }
 }

@@ -1,0 +1,114 @@
+@page
+@model Proj_finalweb_loja.Pages.Colecoes.DetalhesModel
+@{
+    ViewData["Title"] = Model.Colecao.Nome + " — Coleção";
+    var cor = Model.Colecao.CorHex ?? "#6366f1";
+    var icone = Model.Colecao.Icone ?? "tag";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+        <li class="breadcrumb-item"><a asp-page="/Colecoes/Index" class="text-decoration-none text-muted">Coleções</a></li>
+        <li class="breadcrumb-item active fw-bold" aria-current="page" style="color:@cor;">@Model.Colecao.Nome</li>
+    </ol>
+</nav>
+
+<!-- Collection Hero Banner -->
+<div class="mb-5 overflow-hidden shadow-sm" style="border-radius:var(--radius-lg);">
+    <div class="d-flex align-items-center gap-4 px-5 py-4 text-white position-relative overflow-hidden"
+         style="background:linear-gradient(135deg,@cor,@(cor)99);min-height:140px;">
+        <!-- Background pattern -->
+        <div style="position:absolute;top:-20px;right:-20px;font-size:8rem;opacity:0.08;">
+            <i class="bi bi-@icone"></i>
+        </div>
+        <!-- Icon -->
+        <div class="d-none d-md-flex align-items-center justify-content-center rounded-3 shadow"
+             style="width:80px;height:80px;background:rgba(255,255,255,0.2);flex-shrink:0;">
+            <i class="bi bi-@icone" style="font-size:2.5rem;"></i>
+        </div>
+        <!-- Text -->
+        <div>
+            <span class="badge rounded-pill mb-2 fw-bold" style="background:rgba(255,255,255,0.2);font-size:0.75rem;letter-spacing:0.05em;">
+                ✨ COLEÇÃO ESPECIAL
+            </span>
+            <h1 class="fw-extrabold mb-1" style="font-size:clamp(1.5rem,3vw,2rem);">@Model.Colecao.Nome</h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Colecao.Descricao))
+            {
+                <p class="mb-0 opacity-85" style="font-size:0.9rem;max-width:480px;">@Model.Colecao.Descricao</p>
+            }
+        </div>
+    </div>
+    <!-- Stat bar -->
+    <div class="bg-white px-5 py-3 d-flex align-items-center gap-3 border-bottom border-light">
+        <i class="bi bi-grid" style="color:@cor;"></i>
+        <span class="text-muted">
+            <span class="fw-bold text-dark">@Model.Anuncios.Count</span> artigos disponíveis nesta coleção
+        </span>
+    </div>
+</div>
+
+<!-- Listings Grid -->
+@if (!Model.Anuncios.Any())
+{
+    <div class="text-center py-5 text-muted bg-white border border-light" style="border-radius:var(--radius-lg);">
+        <i class="bi bi-search fs-1 d-block mb-3" style="color:@cor;"></i>
+        <h5 class="fw-bold text-dark">Nenhum artigo nesta coleção ainda</h5>
+        <p class="small">Sê o primeiro a publicar um anúncio com a tag <strong>@Model.Colecao.Nome</strong>!</p>
+        <a asp-page="/Anuncios/Create" class="btn btn-premium mt-2">
+            <i class="bi bi-plus-circle"></i> Publicar Anúncio
+        </a>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+        @foreach (var ad in Model.Anuncios)
+        {
+            var principalImg = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
+            var imgUrl = principalImg?.CaminhoFicheiro ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+
+            <div class="col">
+                <div class="card-premium">
+                    <div class="card-img-container">
+                        <span class="badge-premium">
+                            @{
+                                var estadoName = ad.EstadoProduto switch
+                                {
+                                    EstadoProduto.Novo => "Novo",
+                                    EstadoProduto.ComoNovo => "Como Novo",
+                                    EstadoProduto.BomEstado => "Bom Estado",
+                                    EstadoProduto.Usado => "Usado",
+                                    _ => "Para Peças"
+                                };
+                            }
+                            @estadoName
+                        </span>
+                        <img src="@imgUrl" alt="@ad.Titulo" class="card-img-premium" />
+                    </div>
+                    <div class="card-body-premium">
+                        <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                        <h5 class="card-title-premium">
+                            <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id"
+                               class="text-decoration-none text-dark hover-primary">
+                                @ad.Titulo
+                            </a>
+                        </h5>
+                        <div class="card-price-premium mt-auto">
+                            <span>@ad.Preco.ToString("N2") €</span>
+                        </div>
+                    </div>
+                    <div class="card-footer-premium">
+                        <span class="d-flex align-items-center gap-1">
+                            <i class="bi bi-geo-alt"></i> @ad.Vendedor?.Cidade
+                        </span>
+                        <span class="d-flex align-items-center gap-1">
+                            <i class="bi bi-clock"></i> @ad.DataPublicacao.ToString("dd/MM")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

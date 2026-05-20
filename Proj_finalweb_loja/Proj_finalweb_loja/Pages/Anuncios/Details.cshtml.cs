@@ -29,6 +29,8 @@ namespace Proj_finalweb_loja.Pages.Anuncios
                 .Include(a => a.Imagens)
                 .Include(a => a.Vendedor)
                 .Include(a => a.Categoria)
+                .Include(a => a.AnuncioTags)
+                    .ThenInclude(at => at.Tag)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (anuncio == null)

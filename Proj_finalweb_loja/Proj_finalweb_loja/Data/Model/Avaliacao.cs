@@ -64,14 +64,14 @@ namespace Proj_finalweb_loja.Data.Model
         public virtual ApplicationUser? Avaliando { get; set; }
 
         /// <summary>
-        /// Chave estrangeira do anúncio que motivou a transação e avaliação.
+        /// Chave estrangeira opcional do anúncio relacionado com a avaliação.
+        /// Pode ser nula pois a avaliação é feita ao utilizador (vendedor), não ao produto.
         /// </summary>
-        [Required]
-        [Display(Name = "Anúncio")]
-        public int AnuncioFK { get; set; }
+        [Display(Name = "Anúncio (opcional)")]
+        public int? AnuncioFK { get; set; }
 
         /// <summary>
-        /// Referência de navegação para o anúncio relacionado.
+        /// Referência de navegação para o anúncio relacionado (opcional).
         /// </summary>
         [ForeignKey("AnuncioFK")]
         public virtual Anuncio? Anuncio { get; set; }

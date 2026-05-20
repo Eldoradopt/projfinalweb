@@ -122,7 +122,21 @@
                                 <img src="@principalImg.CaminhoFicheiro" alt="@ad.Titulo" class="card-img-premium" />
                             </div>
                             <div class="card-body-premium">
-                                <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="card-category-premium mb-0">@ad.Categoria?.Nome</div>
+                                    @if (ad.AnuncioTags != null && ad.AnuncioTags.Any())
+                                    {
+                                        <div class="d-flex gap-1 flex-wrap justify-content-end">
+                                            @foreach (var at in ad.AnuncioTags.Take(2))
+                                            {
+                                                var tag = at.Tag;
+                                                <span class="badge rounded-pill fw-bold" style="font-size:0.65rem; background:@(tag.EColecaoEspecial ? (tag.CorHex ?? "#6366f1") : "#f3f4f6"); color:@(tag.EColecaoEspecial ? "#ffffff" : "#4b5563");">
+                                                    @tag.Nome
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
                                 <h5 class="card-title-premium">
                                     <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark hover-primary">
                                         @ad.Titulo

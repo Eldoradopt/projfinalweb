@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Proj_finalweb_loja.Data;
 
@@ -11,9 +12,11 @@ using Proj_finalweb_loja.Data;
 namespace Proj_finalweb_loja.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260519095153_AddTagsAndColecoes")]
+    partial class AddTagsAndColecoes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -495,26 +498,6 @@ namespace Proj_finalweb_loja.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("Proj_finalweb_loja.Data.Model.VendedorFavorito", b =>
-                {
-                    b.Property<string>("SeguidorFK")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("VendedorFK")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("DataAdicionado")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SeguidorFK", "VendedorFK");
-
-                    b.HasIndex("VendedorFK");
-
-                    b.ToTable("VendedoresFavoritos");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -696,25 +679,6 @@ namespace Proj_finalweb_loja.Migrations
                     b.Navigation("Remetente");
                 });
 
-            modelBuilder.Entity("Proj_finalweb_loja.Data.Model.VendedorFavorito", b =>
-                {
-                    b.HasOne("Proj_finalweb_loja.Data.Model.ApplicationUser", "Seguidor")
-                        .WithMany("VendedoresFavoritos")
-                        .HasForeignKey("SeguidorFK")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Proj_finalweb_loja.Data.Model.ApplicationUser", "Vendedor")
-                        .WithMany("Seguidores")
-                        .HasForeignKey("VendedorFK")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Seguidor");
-
-                    b.Navigation("Vendedor");
-                });
-
             modelBuilder.Entity("Proj_finalweb_loja.Data.Model.Anuncio", b =>
                 {
                     b.Navigation("AnuncioTags");
@@ -741,10 +705,6 @@ namespace Proj_finalweb_loja.Migrations
                     b.Navigation("MensagensEnviadas");
 
                     b.Navigation("MensagensRecebidas");
-
-                    b.Navigation("Seguidores");
-
-                    b.Navigation("VendedoresFavoritos");
                 });
 
             modelBuilder.Entity("Proj_finalweb_loja.Data.Model.Categoria", b =>

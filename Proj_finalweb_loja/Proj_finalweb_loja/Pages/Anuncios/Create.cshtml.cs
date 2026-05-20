@@ -22,7 +22,7 @@ namespace Proj_finalweb_loja.Pages.Anuncios
         private readonly IWebHostEnvironment _environment;
 
         public CreateModel(
-            ApplicationDbContext context, 
+            ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             IWebHostEnvironment environment)
         {
@@ -35,6 +35,9 @@ namespace Proj_finalweb_loja.Pages.Anuncios
         public AnuncioInputModel Input { get; set; } = new AnuncioInputModel();
 
         public SelectList CategoriasList { get; set; } = null!;
+
+        /// <summary>All existing tags for autocomplete suggestions.</summary>
+        public IList<Tag> TodasAsTags { get; set; } = new List<Tag>();
 
         public class AnuncioInputModel
         {
@@ -66,11 +69,16 @@ namespace Proj_finalweb_loja.Pages.Anuncios
 
             [Display(Name = "Carregar Imagem Local")]
             public IFormFile? ImagemFicheiro { get; set; }
+
+            /// <summary>Comma-separated tag names entered by the user.</summary>
+            [Display(Name = "Tags")]
+            public string? TagsInput { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
             await PopulateCategoriasDropdownAsync();
+            await LoadTagsAsync();
             return Page();
         }
 
@@ -79,6 +87,7 @@ namespace Proj_finalweb_loja.Pages.Anuncios
             if (!ModelState.IsValid)
             {
                 await PopulateCategoriasDropdownAsync();
+                await LoadTagsAsync();
                 return Page();
             }
 
@@ -91,12 +100,12 @@ namespace Proj_finalweb_loja.Pages.Anuncios
             }
             else
             {
-                // FALLBACK FOR TESTING: If not logged in, associate with "demo@ipt.pt" automatically!
                 var demoSeller = await _userManager.FindByEmailAsync("demo@ipt.pt");
                 if (demoSeller == null)
                 {
-                    ModelState.AddModelError(string.Empty, "O utilizador Demo não foi encontrado. Por favor corra a aplicação para semear os dados.");
+                    ModelState.AddModelError(string.Empty, "O utilizador Demo não foi encontrado.");
                     await PopulateCategoriasDropdownAsync();
+                    await LoadTagsAsync();
                     return Page();
                 }
                 vendedorId = demoSeller.Id;
@@ -120,18 +129,14 @@ namespace Proj_finalweb_loja.Pages.Anuncios
             await _context.SaveChangesAsync();
 
             // 3. Handle Image Saving
-            string imagePath = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80"; // Default stock image
+            string imagePath = "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
 
             if (Input.ImagemFicheiro != null && Input.ImagemFicheiro.Length > 0)
             {
-                // Create uploads directory if not exists
                 string uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
                 if (!Directory.Exists(uploadsFolder))
-                {
                     Directory.CreateDirectory(uploadsFolder);
-                }
 
-                // Generate unique filename
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(Input.ImagemFicheiro.FileName);
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -139,8 +144,6 @@ namespace Proj_finalweb_loja.Pages.Anuncios
                 {
                     await Input.ImagemFicheiro.CopyToAsync(fileStream);
                 }
-
-                // Relative path to store in db
                 imagePath = "/uploads/" + uniqueFileName;
             }
             else if (!string.IsNullOrWhiteSpace(Input.ImagemUrl))
@@ -148,15 +151,38 @@ namespace Proj_finalweb_loja.Pages.Anuncios
                 imagePath = Input.ImagemUrl;
             }
 
-            var imagem = new Imagem
-            {
-                CaminhoFicheiro = imagePath,
-                Principal = true,
-                AnuncioFK = anuncio.Id
-            };
-
-            _context.Imagens.Add(imagem);
+            _context.Imagens.Add(new Imagem { CaminhoFicheiro = imagePath, Principal = true, AnuncioFK = anuncio.Id });
             await _context.SaveChangesAsync();
+
+            // 4. Process Tags
+            if (!string.IsNullOrWhiteSpace(Input.TagsInput))
+            {
+                var tagNames = Input.TagsInput
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => t.Trim())
+                    .Where(t => t.Length >= 2 && t.Length <= 50)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Take(10) // max 10 tags per listing
+                    .ToList();
+
+                foreach (var tagName in tagNames)
+                {
+                    // Find existing or create new tag
+                    var existingTag = await _context.Tags
+                        .FirstOrDefaultAsync(t => t.Nome.ToLower() == tagName.ToLower());
+
+                    if (existingTag == null)
+                    {
+                        existingTag = new Tag { Nome = tagName };
+                        _context.Tags.Add(existingTag);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    _context.AnuncioTags.Add(new AnuncioTag { AnuncioFK = anuncio.Id, TagFK = existingTag.Id });
+                }
+
+                await _context.SaveChangesAsync();
+            }
 
             TempData["SuccessMessage"] = "O teu anúncio '" + anuncio.Titulo + "' foi criado com sucesso!";
             return RedirectToPage("/Index");
@@ -170,9 +196,8 @@ namespace Proj_finalweb_loja.Pages.Anuncios
                 .ThenBy(c => c.Nome)
                 .ToListAsync();
 
-            // Format category names beautifully to show hierarchy: "Eletrónica > Telemóveis"
             var selectItems = categorias
-                .Where(c => c.CategoriaPaiFK != null) // Only allow picking subcategories
+                .Where(c => c.CategoriaPaiFK != null)
                 .Select(c => new SelectListItem
                 {
                     Value = c.Id.ToString(),
@@ -181,6 +206,11 @@ namespace Proj_finalweb_loja.Pages.Anuncios
                 .ToList();
 
             CategoriasList = new SelectList(selectItems, "Value", "Text");
+        }
+
+        private async Task LoadTagsAsync()
+        {
+            TodasAsTags = await _context.Tags.OrderBy(t => t.Nome).ToListAsync();
         }
     }
 }

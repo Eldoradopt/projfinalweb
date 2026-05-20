@@ -17,6 +17,9 @@ namespace Proj_finalweb_loja.Data
         public DbSet<Mensagem> Mensagens { get; set; } = null!;
         public DbSet<Avaliacao> Avaliacoes { get; set; } = null!;
         public DbSet<Favorito> Favoritos { get; set; } = null!;
+        public DbSet<Tag> Tags { get; set; } = null!;
+        public DbSet<AnuncioTag> AnuncioTags { get; set; } = null!;
+        public DbSet<VendedorFavorito> VendedoresFavoritos { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -58,7 +61,7 @@ namespace Proj_finalweb_loja.Data
                 .HasForeignKey(m => m.AnuncioFK)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configure Avaliacao relationship (avoid multiple cascade paths)
+            // Configure Avaliacao relationships (AnuncioFK now optional/nullable)
             builder.Entity<Avaliacao>()
                 .HasOne(a => a.Avaliador)
                 .WithMany(u => u.AvaliacoesFeitas)
@@ -75,8 +78,40 @@ namespace Proj_finalweb_loja.Data
                 .HasOne(a => a.Anuncio)
                 .WithMany(an => an.Avaliacoes)
                 .HasForeignKey(a => a.AnuncioFK)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Configure composite key for AnuncioTag (Many-to-Many pivot)
+            builder.Entity<AnuncioTag>()
+                .HasKey(at => new { at.AnuncioFK, at.TagFK });
+
+            builder.Entity<AnuncioTag>()
+                .HasOne(at => at.Anuncio)
+                .WithMany(a => a.AnuncioTags)
+                .HasForeignKey(at => at.AnuncioFK)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<AnuncioTag>()
+                .HasOne(at => at.Tag)
+                .WithMany(t => t.AnuncioTags)
+                .HasForeignKey(at => at.TagFK)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure composite key for VendedorFavorito
+            builder.Entity<VendedorFavorito>()
+                .HasKey(vf => new { vf.SeguidorFK, vf.VendedorFK });
+
+            builder.Entity<VendedorFavorito>()
+                .HasOne(vf => vf.Seguidor)
+                .WithMany(u => u.VendedoresFavoritos)
+                .HasForeignKey(vf => vf.SeguidorFK)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<VendedorFavorito>()
+                .HasOne(vf => vf.Vendedor)
+                .WithMany(u => u.Seguidores)
+                .HasForeignKey(vf => vf.VendedorFK)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
-
