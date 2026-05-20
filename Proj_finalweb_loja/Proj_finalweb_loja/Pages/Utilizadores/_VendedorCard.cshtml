@@ -5,6 +5,13 @@
         <div class="bg-white border border-light shadow-sm h-100 p-4 d-flex flex-column gap-3 position-relative overflow-hidden seller-card"
              style="border-radius: var(--radius-lg); transition: transform 0.2s, box-shadow 0.2s;">
             
+            @if (Model.Utilizador.Suspeito)
+            {
+                <div class="position-absolute top-0 start-0 bg-danger text-white px-3 py-1 small rounded-bottom-end shadow-sm" style="font-size:0.75rem; border-bottom-right-radius: 8px; z-index: 5;">
+                    <i class="bi bi-shield-exclamation"></i> Conta Suspeita
+                </div>
+            }
+            
             <!-- Avatar + Name -->
             <div class="d-flex align-items-center gap-3">
                 @if (!string.IsNullOrWhiteSpace(Model.Utilizador.FotoPerfilPath))

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,6 +8,7 @@ using Proj_finalweb_loja.Data.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -31,9 +33,34 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
         public bool JaAvaliou { get; set; } = false;
         public bool IsOwnProfile { get; set; } = false;
         public bool IsFavorito { get; set; } = false;
+        public string ActiveTab { get; set; } = "anuncios";
 
         [BindProperty]
         public RatingInputModel RatingInput { get; set; } = new();
+
+        [BindProperty]
+        public EditarInputModel EditarInput { get; set; } = new();
+
+        [BindProperty]
+        public IFormFile? FotoPerfil { get; set; }
+
+        public class EditarInputModel
+        {
+            [Required(ErrorMessage = "O nome é obrigatório.")]
+            [StringLength(100, ErrorMessage = "O nome não pode exceder 100 caracteres.")]
+            [Display(Name = "Nome Completo")]
+            public string Nome { get; set; } = string.Empty;
+
+            [Phone(ErrorMessage = "Número de telemóvel inválido.")]
+            [Display(Name = "Telemóvel")]
+            public string? PhoneNumber { get; set; }
+
+            [Display(Name = "Cidade")]
+            public string? Cidade { get; set; }
+
+            [Display(Name = "Morada")]
+            public string? Morada { get; set; }
+        }
 
         public class RatingInputModel
         {
@@ -49,10 +76,15 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
             public string? Comentario { get; set; }
         }
 
-        public async Task<IActionResult> OnGetAsync(string id)
+        public async Task<IActionResult> OnGetAsync(string id, string? tab = null)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return NotFound();
+
+            if (!string.IsNullOrEmpty(tab))
+            {
+                ActiveTab = tab.ToLower();
+            }
 
             Vendedor = await _userManager.Users
                 .FirstOrDefaultAsync(u => u.Id == id) ?? null!;
@@ -90,6 +122,14 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
                     .AnyAsync(a => a.AvaliadorFK == currentUser.Id && a.AvaliandoFK == id);
                 IsFavorito = await _context.VendedoresFavoritos
                     .AnyAsync(vf => vf.SeguidorFK == currentUser.Id && vf.VendedorFK == id);
+
+                if (IsOwnProfile)
+                {
+                    EditarInput.Nome = currentUser.Nome;
+                    EditarInput.PhoneNumber = currentUser.PhoneNumber;
+                    EditarInput.Cidade = currentUser.Cidade;
+                    EditarInput.Morada = currentUser.Morada;
+                }
             }
 
             RatingInput.VendedorId = id;
@@ -200,9 +240,83 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
             return RedirectToPage("/Utilizadores/Perfil", new { id = vendedorId });
         }
 
+        public async Task<IActionResult> OnPostEditarPerfilAsync(string id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || currentUser.Id != id)
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Por favor, corrige os erros no formulário.";
+                ActiveTab = "editar";
+                await ReloadPageAsync(id);
+                return Page();
+            }
+
+            currentUser.Nome = EditarInput.Nome;
+            currentUser.PhoneNumber = EditarInput.PhoneNumber;
+            currentUser.Cidade = EditarInput.Cidade;
+            currentUser.Morada = EditarInput.Morada;
+
+            if (FotoPerfil != null)
+            {
+                // Verify directory exists
+                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "users");
+                if (!Directory.Exists(uploadsDir))
+                {
+                    Directory.CreateDirectory(uploadsDir);
+                }
+
+                // File name
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(FotoPerfil.FileName)}";
+                var filePath = Path.Combine(uploadsDir, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await FotoPerfil.CopyToAsync(fileStream);
+                }
+
+                // Delete old photo if it exists and is local
+                if (!string.IsNullOrWhiteSpace(currentUser.FotoPerfilPath) && currentUser.FotoPerfilPath.StartsWith("/images/users/"))
+                {
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", currentUser.FotoPerfilPath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                        catch { /* ignore */ }
+                    }
+                }
+
+                currentUser.FotoPerfilPath = $"/images/users/{uniqueFileName}";
+            }
+
+            var result = await _userManager.UpdateAsync(currentUser);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Perfil atualizado com sucesso!";
+                return RedirectToPage("/Utilizadores/Perfil", new { id = currentUser.Id, tab = "editar" });
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            TempData["ErrorMessage"] = "Ocorreu um erro ao atualizar o perfil.";
+            ActiveTab = "editar";
+            await ReloadPageAsync(id);
+            return Page();
+        }
+
         private async Task<IActionResult> ReloadPageAsync(string id)
         {
-            await OnGetAsync(id);
+            await OnGetAsync(id, ActiveTab);
             return Page();
         }
     }

@@ -87,5 +87,30 @@ namespace Proj_finalweb_loja.Pages.Mensagens
 
             return Page();
         }
+
+        public async Task<JsonResult> OnGetUnreadCountAsync()
+        {
+            string currentUserId;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                currentUserId = user?.Id ?? "";
+            }
+            else
+            {
+                var demoUser = await _userManager.FindByEmailAsync("joao@ipt.pt");
+                currentUserId = demoUser?.Id ?? "";
+            }
+
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return new JsonResult(new { count = 0 });
+            }
+
+            var unreadCount = await _context.Mensagens
+                .CountAsync(m => m.DestinatarioFK == currentUserId && !m.Lida);
+
+            return new JsonResult(new { count = unreadCount });
+        }
     }
 }

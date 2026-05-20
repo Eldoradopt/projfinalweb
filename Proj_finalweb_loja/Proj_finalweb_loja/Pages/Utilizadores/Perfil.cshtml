@@ -23,7 +23,7 @@
     <!-- Coloured banner -->
     <div style="height:100px; background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));"></div>
     
-    <div class="p-4 pt-0 d-flex flex-column flex-md-row align-items-md-end gap-4" style="margin-top:-48px;">
+    <div class="p-4 pt-0 d-flex flex-column flex-md-row align-items-md-end gap-4 flex-wrap" style="margin-top:-48px; min-width: 0;">
         <!-- Avatar -->
         @if (!string.IsNullOrWhiteSpace(Model.Vendedor.FotoPerfilPath))
         {
@@ -40,8 +40,14 @@
         }
 
         <!-- Info -->
-        <div class="flex-grow-1 pb-2">
-            <h1 class="fw-extrabold h3 mb-0 text-dark">@Model.Vendedor.Nome</h1>
+        <div class="flex-grow-1 pb-2" style="min-width: 0;">
+            <h1 class="fw-extrabold h3 mb-0 text-dark text-break-all d-inline-flex align-items-center gap-2 flex-wrap">
+                @Model.Vendedor.Nome
+                @if (Model.Vendedor.Suspeito)
+                {
+                    <span class="badge bg-danger fs-6 align-middle"><i class="bi bi-shield-exclamation"></i> Conta Suspeita</span>
+                }
+            </h1>
             <p class="text-muted mb-2">
                 <i class="bi bi-geo-alt"></i> @(Model.Vendedor.Cidade ?? "—")
                 <span class="mx-2">·</span>
@@ -78,9 +84,9 @@
             <div class="d-flex gap-2 mt-2 w-100 justify-content-md-end">
                 @if (Model.IsOwnProfile)
                 {
-                    <a asp-page="/Utilizadores/EditarPerfil" class="btn btn-premium btn-sm">
+                    <button class="btn btn-premium btn-sm" onclick="switchProfileTab('editar')">
                         <i class="bi bi-pencil-square"></i> Editar Perfil
-                    </a>
+                    </button>
                 }
                 else if (User.Identity.IsAuthenticated)
                 {
@@ -96,123 +102,400 @@
     </div>
 </div>
 
+@if (Model.IsOwnProfile)
+{
+    <!-- Navigation Tabs for unified profile dashboard -->
+    <div class="profile-tabs-nav mb-4">
+        <button class="profile-tab-link @(Model.ActiveTab == "anuncios" ? "active" : "")" onclick="switchProfileTab('anuncios')">
+            <i class="bi bi-grid-3x3-gap"></i> Os Meus Anúncios
+        </button>
+        <button class="profile-tab-link @(Model.ActiveTab == "editar" ? "active" : "")" onclick="switchProfileTab('editar')">
+            <i class="bi bi-pencil-square"></i> Editar Perfil
+        </button>
+        <button class="profile-tab-link @(Model.ActiveTab == "seguranca" ? "active" : "")" onclick="switchProfileTab('seguranca')">
+            <i class="bi bi-shield-lock"></i> Segurança
+        </button>
+    </div>
+}
+
 <div class="row g-5">
     <!-- LEFT: Listings + Sales -->
     <div class="col-lg-8">
 
-        <!-- Active Listings -->
-        <h4 class="fw-bold mb-3"><i class="bi bi-grid text-primary"></i> Anúncios Ativos</h4>
-        @if (!Model.AnunciosAtivos.Any())
+        @if (Model.IsOwnProfile)
         {
-            <div class="text-muted bg-white border border-light p-4 rounded mb-5" style="border-radius:var(--radius-md);">
-                <i class="bi bi-inbox me-2"></i> Sem anúncios ativos de momento.
-            </div>
-        }
-        else
-        {
-            <div class="row row-cols-1 row-cols-sm-2 g-3 mb-5">
-                @foreach (var ad in Model.AnunciosAtivos)
-                {
-                    var img = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
-                    var imgUrl = img?.CaminhoFicheiro ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+            <!-- Tab Pane: Anúncios -->
+            <div id="tab-anuncios" class="profile-tab-pane @(Model.ActiveTab == "anuncios" ? "active" : "")">
+                <!-- Active Listings -->
+                <h4 class="fw-bold mb-3"><i class="bi bi-grid text-primary"></i> Os Meus Anúncios Ativos</h4>
+                
+                <div class="row row-cols-1 row-cols-sm-2 g-3 mb-5">
+                    <!-- Shortcut Card for Creating a Listing -->
                     <div class="col">
-                        <div class="card-premium">
-                            <div class="card-img-container">
-                                <img src="@imgUrl" alt="@ad.Titulo" class="card-img-premium" />
+                        <a asp-page="/Anuncios/Create" class="text-decoration-none">
+                            <div class="card h-100 d-flex flex-column align-items-center justify-content-center border-dashed py-4 text-center text-primary" style="border: 2px dashed var(--clr-primary); border-radius: var(--radius-md); cursor: pointer; min-height: 250px; background-color: var(--clr-primary-light);">
+                                <i class="bi bi-plus-circle-dotted" style="font-size: 3rem; color: var(--clr-primary);"></i>
+                                <h5 class="fw-bold mt-3 text-primary">Criar Novo Anúncio</h5>
+                                <p class="text-muted small px-3">Publica um novo artigo em segunda mão no BazarIPT de forma rápida e intuitiva.</p>
                             </div>
-                            <div class="card-body-premium">
-                                <div class="card-category-premium">@ad.Categoria?.Nome</div>
-                                <h5 class="card-title-premium">
-                                    <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark">@ad.Titulo</a>
-                                </h5>
-                                <div class="card-price-premium mt-auto"><span>@ad.Preco.ToString("N2") €</span></div>
-                            </div>
-                        </div>
+                        </a>
                     </div>
-                }
-            </div>
-        }
 
-        <!-- Completed Sales -->
-        @if (Model.VendasConcluidas.Any())
-        {
-            <h4 class="fw-bold mb-3"><i class="bi bi-bag-check text-success"></i> @(Model.IsOwnProfile ? "As Minhas Vendas" : "Vendas Concluídas")</h4>
-            <div class="row row-cols-1 row-cols-sm-2 g-3 mb-5">
-                @foreach (var ad in Model.VendasConcluidas)
-                {
-                    var img = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
-                    var imgUrl = img?.CaminhoFicheiro ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
-                    <div class="col">
-                        <div class="card-premium" style="opacity:0.7;">
-                            <div class="card-img-container">
-                                <span class="badge-premium" style="background:#10b981;">Vendido</span>
-                                <img src="@imgUrl" alt="@ad.Titulo" class="card-img-premium" style="filter:grayscale(40%);" />
-                            </div>
-                            <div class="card-body-premium">
-                                <div class="card-category-premium">@ad.Categoria?.Nome</div>
-                                <h5 class="card-title-premium text-muted">@ad.Titulo</h5>
-                                <div class="d-flex justify-content-between align-items-center mt-auto">
-                                    <div class="card-price-premium"><span>@ad.Preco.ToString("N2") €</span></div>
-                                    @if (Model.IsOwnProfile)
-                                    {
-                                        <form method="post" asp-page-handler="RemoverVenda" asp-route-anuncioId="@ad.Id" asp-route-vendedorId="@Model.Vendedor.Id" onsubmit="return confirm('Tens a certeza que desejas remover esta venda do teu registo?');">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm border-0 py-1 px-2" title="Remover Venda">
-                                                <i class="bi bi-trash"></i> Apagar
-                                            </button>
-                                        </form>
-                                    }
+                    @foreach (var ad in Model.AnunciosAtivos)
+                    {
+                        var img = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
+                        var imgUrl = img?.CaminhoFicheiro ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+                        <div class="col">
+                            <div class="card-premium h-100 d-flex flex-column">
+                                <div class="card-img-container">
+                                    <img src="@imgUrl" alt="@ad.Titulo" class="card-img-premium" />
+                                </div>
+                                <div class="card-body-premium d-flex flex-column flex-grow-1">
+                                    <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                                    <h5 class="card-title-premium">
+                                        <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark">@ad.Titulo</a>
+                                    </h5>
+                                    <div class="card-price-premium mt-auto"><span>@ad.Preco.ToString("N2") €</span></div>
+                                    
+                                    <!-- Quick Edit and Delete Controls -->
+                                    <div class="d-flex gap-2 mt-3 pt-2 border-top">
+                                        <a asp-page="/Anuncios/Edit" asp-route-id="@ad.Id" class="btn btn-sm btn-outline-primary w-50 py-1 px-2 border-0">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a asp-page="/Anuncios/Delete" asp-route-id="@ad.Id" class="btn btn-sm btn-outline-danger w-50 py-1 px-2 border-0">
+                                            <i class="bi bi-trash"></i> Eliminar
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                }
-            </div>
-        }
+                    }
+                </div>
 
-        <!-- Reviews Section -->
-        <h4 class="fw-bold mb-3"><i class="bi bi-chat-square-quote text-primary"></i> Avaliações Recebidas</h4>
-        @if (!Model.Avaliacoes.Any())
-        {
-            <div class="text-muted bg-white border border-light p-4 rounded" style="border-radius:var(--radius-md);">
-                <i class="bi bi-star me-2"></i> Este vendedor ainda não tem avaliações.
-            </div>
-        }
-        else
-        {
-            <div class="d-flex flex-column gap-3">
-                @foreach (var av in Model.Avaliacoes)
+                <!-- Completed Sales -->
+                @if (Model.VendasConcluidas.Any())
                 {
-                    <div class="bg-white border border-light p-4 shadow-sm" style="border-radius:var(--radius-md);">
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            @if (!string.IsNullOrWhiteSpace(av.Avaliador?.FotoPerfilPath))
-                            {
-                                <img src="@av.Avaliador.FotoPerfilPath" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" />
-                            }
-                            else
-                            {
-                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
-                                     style="width:40px;height:40px;font-size:1rem;background:linear-gradient(135deg,var(--clr-primary),var(--clr-secondary));">
-                                    @(!string.IsNullOrWhiteSpace(av.Avaliador?.Nome) ? av.Avaliador.Nome.Substring(0, 1).ToUpper() : "U")
-                                </div>
-                            }
-                            <div class="flex-grow-1">
-                                <span class="fw-bold text-dark">@(av.Avaliador?.Nome ?? "Utilizador")</span>
-                                <div class="d-flex gap-1" style="color:#f59e0b;font-size:0.85rem;">
-                                    @for (int i = 1; i <= 5; i++)
-                                    {
-                                        <i class="bi @(i <= av.Nota ? "bi-star-fill" : "bi-star")" style="@(i > av.Nota ? "color:#d1d5db;" : "")"></i>
-                                    }
-                                </div>
-                            </div>
-                            <span class="text-muted small">@av.DataAvaliacao.ToString("dd/MM/yyyy")</span>
-                        </div>
-                        @if (!string.IsNullOrWhiteSpace(av.Comentario))
+                    <h4 class="fw-bold mb-3"><i class="bi bi-bag-check text-success"></i> As Minhas Vendas</h4>
+                    <div class="row row-cols-1 row-cols-sm-2 g-3 mb-5">
+                        @foreach (var ad in Model.VendasConcluidas)
                         {
-                            <p class="text-muted mb-0 small" style="line-height:1.6;">@av.Comentario</p>
+                            var img = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
+                            var imgUrl = img?.CaminhoFicheiro ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+                            <div class="col">
+                                <div class="card-premium" style="opacity:0.7;">
+                                    <div class="card-img-container">
+                                        <span class="badge-premium" style="background:#10b981;">Vendido</span>
+                                        <img src="@imgUrl" alt="@ad.Titulo" class="card-img-premium" style="filter:grayscale(40%);" />
+                                    </div>
+                                    <div class="card-body-premium">
+                                        <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                                        <h5 class="card-title-premium text-muted">@ad.Titulo</h5>
+                                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                                            <div class="card-price-premium"><span>@ad.Preco.ToString("N2") €</span></div>
+                                            <form method="post" asp-page-handler="RemoverVenda" asp-route-anuncioId="@ad.Id" asp-route-vendedorId="@Model.Vendedor.Id" onsubmit="return confirm('Tens a certeza que desejas remover esta venda do teu registo?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm border-0 py-1 px-2" title="Remover Venda">
+                                                    <i class="bi bi-trash"></i> Apagar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Reviews Section -->
+                <h4 class="fw-bold mb-3"><i class="bi bi-chat-square-quote text-primary"></i> Avaliações Recebidas</h4>
+                @if (!Model.Avaliacoes.Any())
+                {
+                    <div class="text-muted bg-white border border-light p-4 rounded" style="border-radius:var(--radius-md);">
+                        <i class="bi bi-star me-2"></i> Ainda não recebeste avaliações.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var av in Model.Avaliacoes)
+                        {
+                            <div class="bg-white border border-light p-4 shadow-sm" style="border-radius:var(--radius-md);">
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    @if (!string.IsNullOrWhiteSpace(av.Avaliador?.FotoPerfilPath))
+                                    {
+                                        <img src="@av.Avaliador.FotoPerfilPath" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                                             style="width:40px;height:40px;font-size:1rem;background:linear-gradient(135deg,var(--clr-primary),var(--clr-secondary));">
+                                            @(!string.IsNullOrWhiteSpace(av.Avaliador?.Nome) ? av.Avaliador.Nome.Substring(0, 1).ToUpper() : "U")
+                                        </div>
+                                    }
+                                    <div class="flex-grow-1">
+                                        <span class="fw-bold text-dark">@(av.Avaliador?.Nome ?? "Utilizador")</span>
+                                        <div class="d-flex gap-1" style="color:#f59e0b;font-size:0.85rem;">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi @(i <= av.Nota ? "bi-star-fill" : "bi-star")" style="@(i > av.Nota ? "color:#d1d5db;" : "")"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    <span class="text-muted small">@av.DataAvaliacao.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(av.Comentario))
+                                {
+                                    <p class="text-muted mb-0 small" style="line-height:1.6;">@av.Comentario</p>
+                                }
+                            </div>
                         }
                     </div>
                 }
             </div>
+
+            <!-- Tab Pane: Editar Perfil -->
+            <div id="tab-editar" class="profile-tab-pane @(Model.ActiveTab == "editar" ? "active" : "")">
+                <div class="bg-white border border-light shadow-sm p-4 rounded mb-5" style="border-radius: var(--radius-lg);">
+                    <h4 class="fw-bold mb-4 text-dark"><i class="bi bi-pencil-square text-primary"></i> Editar Informações do Perfil</h4>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post" asp-page-handler="EditarPerfil" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row g-4">
+                            <!-- Foto de Perfil Upload -->
+                            <div class="col-md-4 text-center border-end pe-md-4">
+                                <h6 class="fw-bold text-uppercase text-muted small mb-3">Foto de Perfil</h6>
+                                <div class="mb-3 position-relative d-inline-block">
+                                    @if (!string.IsNullOrWhiteSpace(Model.Vendedor.FotoPerfilPath))
+                                    {
+                                        <img src="@Model.Vendedor.FotoPerfilPath" alt="Foto Atual" id="avatarEditPreview"
+                                             class="rounded-circle border border-4 border-white shadow-sm img-thumbnail"
+                                             style="width: 140px; height: 140px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div id="avatarEditPlaceholder" class="rounded-circle border border-4 border-white shadow-sm d-flex align-items-center justify-content-center fw-bold text-white fs-1 mx-auto"
+                                             style="width: 140px; height: 140px; background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));">
+                                            @(!string.IsNullOrWhiteSpace(Model.Vendedor.Nome) ? Model.Vendedor.Nome.Substring(0, 1).ToUpper() : "U")
+                                        </div>
+                                        <img id="avatarEditPreview" class="rounded-circle border border-4 border-white shadow-sm img-thumbnail d-none"
+                                             style="width: 140px; height: 140px; object-fit: cover;" />
+                                    }
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="fotoEditInput" class="btn btn-premium-outline btn-sm w-100 justify-content-center">
+                                        <i class="bi bi-camera"></i> Escolher Nova Foto
+                                    </label>
+                                    <input type="file" asp-for="FotoPerfil" id="fotoEditInput" class="d-none" accept="image/*" onchange="previewEditImage(this)" />
+                                    <span asp-validation-for="FotoPerfil" class="text-danger small d-block mt-1"></span>
+                                </div>
+                                <p class="text-muted small">Carrega uma foto quadrada de até 5MB nos formatos JPG, PNG ou WEBP.</p>
+                            </div>
+
+                            <!-- Dados Pessoais -->
+                            <div class="col-md-8 ps-md-4">
+                                <h6 class="fw-bold text-uppercase text-muted small mb-3">Informações Pessoais</h6>
+                                
+                                <div class="form-floating mb-3">
+                                    <input asp-for="EditarInput.Nome" class="form-control" placeholder="Teu Nome" />
+                                    <label asp-for="EditarInput.Nome"></label>
+                                    <span asp-validation-for="EditarInput.Nome" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="EditarInput.PhoneNumber" class="form-control" placeholder="Teu Telemóvel" />
+                                    <label asp-for="EditarInput.PhoneNumber"></label>
+                                    <span asp-validation-for="EditarInput.PhoneNumber" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="EditarInput.Cidade" class="form-control" placeholder="Tua Cidade" />
+                                    <label asp-for="EditarInput.Cidade"></label>
+                                    <span asp-validation-for="EditarInput.Cidade" class="text-danger small"></span>
+                                </div>
+
+                                <div class="form-floating mb-4">
+                                    <input asp-for="EditarInput.Morada" class="form-control" placeholder="Tua Morada" />
+                                    <label asp-for="EditarInput.Morada"></label>
+                                    <span asp-validation-for="EditarInput.Morada" class="text-danger small"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-premium">
+                                        <i class="bi bi-check-lg"></i> Guardar Alterações
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab Pane: Segurança -->
+            <div id="tab-seguranca" class="profile-tab-pane @(Model.ActiveTab == "seguranca" ? "active" : "")">
+                <div class="bg-white border border-light shadow-sm p-4 rounded mb-5" style="border-radius: var(--radius-lg);">
+                    <h4 class="fw-bold mb-4 text-dark"><i class="bi bi-shield-lock text-primary"></i> Segurança & Dados Pessoais</h4>
+                    <p class="text-muted small">Gere as configurações de segurança da tua conta do BazarIPT.</p>
+
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                            <div class="card h-100 border border-light shadow-sm p-4" style="border-radius: var(--radius-md);">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="p-3 rounded text-primary" style="font-size: 1.5rem; background-color: var(--clr-primary-light);">
+                                        <i class="bi bi-key-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0">Palavra-passe</h5>
+                                        <p class="text-muted small mb-0">Altera a tua palavra-passe regularmente.</p>
+                                    </div>
+                                </div>
+                                <a href="/Identity/Account/Manage/ChangePassword" class="btn btn-premium btn-sm mt-auto w-100 text-center">
+                                    <i class="bi bi-pencil-square"></i> Alterar Palavra-passe
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card h-100 border border-light shadow-sm p-4" style="border-radius: var(--radius-md);">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="p-3 rounded text-success" style="font-size: 1.5rem; background-color: #ecfdf5; color: #10b981;">
+                                        <i class="bi bi-file-earmark-person"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0">Dados Pessoais</h5>
+                                        <p class="text-muted small mb-0">Descarrega ou elimina os teus dados da plataforma.</p>
+                                    </div>
+                                </div>
+                                <a href="/Identity/Account/Manage/PersonalData" class="btn btn-outline-secondary btn-sm mt-auto w-100 text-center">
+                                    <i class="bi bi-gear"></i> Gerir Dados Pessoais
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Active Listings -->
+            <h4 class="fw-bold mb-3"><i class="bi bi-grid text-primary"></i> Anúncios Ativos</h4>
+            @if (!Model.AnunciosAtivos.Any())
+            {
+                <div class="text-muted bg-white border border-light p-4 rounded mb-5" style="border-radius:var(--radius-md);">
+                    <i class="bi bi-inbox me-2"></i> Sem anúncios ativos de momento.
+                </div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-sm-2 g-3 mb-5">
+                    @foreach (var ad in Model.AnunciosAtivos)
+                    {
+                        var img = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
+                        var imgUrl = img?.CaminhoFicheiro ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+                        <div class="col">
+                            <div class="card-premium">
+                                <div class="card-img-container">
+                                    <img src="@imgUrl" alt="@ad.Titulo" class="card-img-premium" />
+                                </div>
+                                <div class="card-body-premium">
+                                    <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                                    <h5 class="card-title-premium">
+                                        <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark">@ad.Titulo</a>
+                                    </h5>
+                                    <div class="card-price-premium mt-auto"><span>@ad.Preco.ToString("N2") €</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Completed Sales -->
+            @if (Model.VendasConcluidas.Any())
+            {
+                <h4 class="fw-bold mb-3"><i class="bi bi-bag-check text-success"></i> Vendas Concluídas</h4>
+                <div class="row row-cols-1 row-cols-sm-2 g-3 mb-5">
+                    @foreach (var ad in Model.VendasConcluidas)
+                    {
+                        var img = ad.Imagens.FirstOrDefault(i => i.Principal) ?? ad.Imagens.FirstOrDefault();
+                        var imgUrl = img?.CaminhoFicheiro ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+                        <div class="col">
+                            <div class="card-premium" style="opacity:0.7;">
+                                <div class="card-img-container">
+                                    <span class="badge-premium" style="background:#10b981;">Vendido</span>
+                                    <img src="@imgUrl" alt="@ad.Titulo" class="card-img-premium" style="filter:grayscale(40%);" />
+                                </div>
+                                <div class="card-body-premium">
+                                    <div class="card-category-premium">@ad.Categoria?.Nome</div>
+                                    <h5 class="card-title-premium text-muted">@ad.Titulo</h5>
+                                    <div class="card-price-premium"><span>@ad.Preco.ToString("N2") €</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Reviews Section -->
+            <h4 class="fw-bold mb-3"><i class="bi bi-chat-square-quote text-primary"></i> Avaliações Recebidas</h4>
+            @if (!Model.Avaliacoes.Any())
+            {
+                <div class="text-muted bg-white border border-light p-4 rounded" style="border-radius:var(--radius-md);">
+                    <i class="bi bi-star me-2"></i> Este vendedor ainda não tem avaliações.
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var av in Model.Avaliacoes)
+                    {
+                        <div class="bg-white border border-light p-4 shadow-sm" style="border-radius:var(--radius-md);">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                @if (!string.IsNullOrWhiteSpace(av.Avaliador?.FotoPerfilPath))
+                                {
+                                    <img src="@av.Avaliador.FotoPerfilPath" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                                         style="width:40px;height:40px;font-size:1rem;background:linear-gradient(135deg,var(--clr-primary),var(--clr-secondary));">
+                                        @(!string.IsNullOrWhiteSpace(av.Avaliador?.Nome) ? av.Avaliador.Nome.Substring(0, 1).ToUpper() : "U")
+                                    </div>
+                                }
+                                <div class="flex-grow-1">
+                                    <span class="fw-bold text-dark">@(av.Avaliador?.Nome ?? "Utilizador")</span>
+                                    <div class="d-flex gap-1" style="color:#f59e0b;font-size:0.85rem;">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="bi @(i <= av.Nota ? "bi-star-fill" : "bi-star")" style="@(i > av.Nota ? "color:#d1d5db;" : "")"></i>
+                                        }
+                                    </div>
+                                </div>
+                                <span class="text-muted small">@av.DataAvaliacao.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(av.Comentario))
+                            {
+                                <p class="text-muted mb-0 small" style="line-height:1.6;">@av.Comentario</p>
+                            }
+                        </div>
+                    }
+                </div>
+            }
         }
     </div>
 
@@ -289,36 +572,91 @@
 </div>
 
 @section Scripts {
-<script>
-    const stars = document.querySelectorAll('.star-btn');
-    const notaInput = document.getElementById('notaInput');
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Stars Picker logic
+        const stars = document.querySelectorAll('.star-btn');
+        const notaInput = document.getElementById('notaInput');
 
-    stars.forEach(star => {
-        star.addEventListener('mouseover', function () {
-            const val = parseInt(this.dataset.value);
-            stars.forEach((s, idx) => {
-                s.classList.toggle('bi-star-fill', idx < val);
-                s.classList.toggle('bi-star', idx >= val);
-                s.style.color = idx < val ? '#f59e0b' : '#d1d5db';
+        if (stars.length > 0) {
+            stars.forEach(star => {
+                star.addEventListener('mouseover', function () {
+                    const val = parseInt(this.dataset.value);
+                    stars.forEach((s, idx) => {
+                        s.classList.toggle('bi-star-fill', idx < val);
+                        s.classList.toggle('bi-star', idx >= val);
+                        s.style.color = idx < val ? '#f59e0b' : '#d1d5db';
+                    });
+                });
+                star.addEventListener('mouseout', function () {
+                    const current = parseInt(notaInput?.value || '0');
+                    stars.forEach((s, idx) => {
+                        s.classList.toggle('bi-star-fill', idx < current);
+                        s.classList.toggle('bi-star', idx >= current);
+                        s.style.color = idx < current ? '#f59e0b' : '#d1d5db';
+                    });
+                });
+                star.addEventListener('click', function () {
+                    const val = parseInt(this.dataset.value);
+                    if (notaInput) notaInput.value = val;
+                    stars.forEach((s, idx) => {
+                        s.classList.toggle('bi-star-fill', idx < val);
+                        s.classList.toggle('bi-star', idx >= val);
+                        s.style.color = idx < val ? '#f59e0b' : '#d1d5db';
+                    });
+                });
             });
+        }
+
+        // Tab Switching logic
+        function switchProfileTab(tabName) {
+            // Hide all panes
+            document.querySelectorAll('.profile-tab-pane').forEach(p => p.classList.remove('active'));
+            // Deactivate all links
+            document.querySelectorAll('.profile-tab-link').forEach(l => l.classList.remove('active'));
+            
+            // Show target pane
+            const targetPane = document.getElementById('tab-' + tabName);
+            if (targetPane) targetPane.classList.add('active');
+            
+            // Activate target link
+            const targetLink = document.querySelector(`.profile-tab-link[onclick="switchProfileTab('${tabName}')"]`);
+            if (targetLink) targetLink.classList.add('active');
+            
+            // Update URL query parameter without reloading
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabName);
+            window.history.pushState({}, '', url);
+        }
+
+        // Photo upload preview logic
+        function previewEditImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('avatarEditPreview');
+                    const placeholder = document.getElementById('avatarEditPlaceholder');
+                    
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('d-none');
+                    }
+                    
+                    if (placeholder) {
+                        placeholder.classList.add('d-none');
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // On page load, check if there's a tab param in the URL
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab');
+            if (activeTab) {
+                switchProfileTab(activeTab);
+            }
         });
-        star.addEventListener('mouseout', function () {
-            const current = parseInt(notaInput?.value || '0');
-            stars.forEach((s, idx) => {
-                s.classList.toggle('bi-star-fill', idx < current);
-                s.classList.toggle('bi-star', idx >= current);
-                s.style.color = idx < current ? '#f59e0b' : '#d1d5db';
-            });
-        });
-        star.addEventListener('click', function () {
-            const val = parseInt(this.dataset.value);
-            if (notaInput) notaInput.value = val;
-            stars.forEach((s, idx) => {
-                s.classList.toggle('bi-star-fill', idx < val);
-                s.classList.toggle('bi-star', idx >= val);
-                s.style.color = idx < val ? '#f59e0b' : '#d1d5db';
-            });
-        });
-    });
-</script>
+    </script>
 }

@@ -4,142 +4,217 @@
     ViewData["Title"] = "Editar Anúncio";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <!-- Breadcrumb navigation -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
-                <li class="breadcrumb-item"><a asp-page="/Anuncios/Index" class="text-decoration-none text-muted">Artigos</a></li>
-                <li class="breadcrumb-item"><a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="text-decoration-none text-muted">@Model.Anuncio.Titulo</a></li>
-                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Editar</li>
-            </ol>
-        </nav>
+<div class="container-fluid py-2">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+            <li class="breadcrumb-item"><a asp-page="/Anuncios/Index" class="text-decoration-none text-muted">Artigos</a></li>
+            <li class="breadcrumb-item"><a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="text-decoration-none text-muted text-truncate" style="max-width: 150px;">@Model.Anuncio.Titulo</a></li>
+            <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Editar</li>
+        </ol>
+    </nav>
 
-        <!-- Card Container -->
-        <div class="bg-white border border-light p-4 p-md-5 shadow-sm" style="border-radius: var(--radius-lg);">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div class="bg-primary-light rounded-circle p-3 text-primary d-flex align-items-center justify-content-center" style="background-color: var(--clr-primary-light); width: 60px; height: 60px;">
-                    <i class="bi bi-pencil-square fs-2" style="color: var(--clr-primary);"></i>
-                </div>
-                <div>
-                    <h1 class="fw-extrabold h3 mb-1">Editar o teu Anúncio</h1>
-                    <p class="text-muted small mb-0">Atualiza os dados, o estado de venda ou a imagem do teu artigo.</p>
+    <div class="row g-4">
+        <!-- COLUNA ESQUERDA: PREVIEW REATIVA DO ARTIGO -->
+        <div class="col-lg-4 col-md-5 order-2 order-md-1">
+            <div class="sticky-top" style="top: 2rem; z-index: 10;">
+                <div class="bg-white border border-light p-4 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+                    <h5 class="fw-bold mb-3 text-muted-dark"><i class="bi bi-eye me-2 text-primary"></i>Pré-visualização</h5>
+                    <p class="text-muted small mb-4">Esta é a aparência atualizada que os outros utilizadores verão na listagem de artigos.</p>
+
+                    <!-- Realistic Listing Card Mock -->
+                    <div class="card border border-light shadow-sm overflow-hidden h-100 position-relative" style="border-radius: var(--radius-md); transition: var(--transition);">
+                        <!-- Listing Status Badge Overlay -->
+                        <div class="position-absolute top-0 start-0 m-3 z-3">
+                            <span id="previewStatusBadge" class="badge bg-success px-3 py-2 shadow-sm rounded-pill text-uppercase tracking-wider fw-bold" style="font-size: 0.7rem;">
+                                Disponível
+                            </span>
+                        </div>
+
+                        <!-- Product Wear Badge Overlay -->
+                        <div class="position-absolute top-0 end-0 m-3 z-3">
+                            <span id="previewWearBadge" class="badge bg-dark px-3 py-2 shadow-sm rounded-pill" style="font-size: 0.7rem;">
+                                Em Bom Estado
+                            </span>
+                        </div>
+
+                        <!-- Visual Area with loading / fallback -->
+                        <div class="bg-light d-flex align-items-center justify-content-center position-relative overflow-hidden" style="height: 220px;">
+                            <!-- Placeholder -->
+                            <div id="imagePlaceholder" class="text-muted text-center p-4">
+                                <i class="bi bi-image fs-1 d-block mb-1 text-muted-light" style="opacity: 0.5;"></i>
+                                <span class="small d-block">Sem imagem do artigo</span>
+                            </div>
+
+                            <!-- Loading Spinner -->
+                            <div id="imageLoading" class="position-absolute top-50 start-50 translate-middle d-none">
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </div>
+
+                            <!-- Main Image -->
+                            <img id="imagePreview" src="@Model.Input.ImagemUrl" alt="Artigo" class="w-100 h-100 d-none" style="object-fit: cover;" />
+                            
+                            <!-- Error fallback -->
+                            <div id="imagePreviewError" class="text-danger text-center p-3 d-none">
+                                <i class="bi bi-exclamation-triangle fs-2 d-block mb-1"></i>
+                                <span class="small d-block fw-semibold" style="font-size: 0.75rem;">Link de imagem inválido</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span id="previewCategory" class="text-uppercase tracking-wider small fw-bold text-muted" style="font-size: 0.75rem;">
+                                    Artigos
+                                </span>
+                                <h4 id="previewPrice" class="fw-extrabold text-primary mb-0">
+                                    @Model.Input.Preco.ToString("0.00") €
+                                </h4>
+                            </div>
+
+                            <h5 id="previewTitle" class="fw-bold text-dark text-truncate mb-2" style="font-family: var(--font-primary);">
+                                @Model.Input.Titulo
+                            </h5>
+
+                            <p class="text-muted small mb-0 d-flex align-items-center gap-1">
+                                <i class="bi bi-person text-primary"></i> Vendedor Demo
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            @if (!User.Identity?.IsAuthenticated ?? true)
-            {
-                <div class="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4" style="background-color: var(--clr-primary-light); color: var(--clr-primary) !important; border-radius: var(--radius-md);">
-                    <i class="bi bi-info-circle-fill fs-4" style="color: var(--clr-primary);"></i>
-                    <div class="text-dark">
-                        <strong>Modo de Demonstração Ativo:</strong> Estás a editar sem sessão iniciada. Tens permissão para modificar este anúncio porque ele pertence ao <strong>Vendedor Demo</strong>.
+        <!-- COLUNA DIREITA: FORMULÁRIO DE EDIÇÃO -->
+        <div class="col-lg-8 col-md-7 order-1 order-md-2">
+            <div class="bg-white border border-light p-4 p-md-5 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-primary-light rounded-circle p-3 text-primary d-flex align-items-center justify-content-center" style="background-color: var(--clr-primary-light); width: 60px; height: 60px;">
+                        <i class="bi bi-pencil-square fs-2" style="color: var(--clr-primary);"></i>
                     </div>
-                </div>
-            }
-
-            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
-                <input type="hidden" asp-for="Input.Id" />
-
-                <!-- 1. Estado do Anúncio & Preço Row -->
-                <div class="row g-4 mb-4">
-                    <div class="col-md-4">
-                        <label asp-for="Input.Estado" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-activity text-muted"></i></span>
-                            <select asp-for="Input.Estado" class="form-select border-start-0 py-2" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
-                                <option value="0">Disponível</option>
-                                <option value="1">Reservado</option>
-                                <option value="2">Vendido</option>
-                            </select>
-                        </div>
-                        <span asp-validation-for="Input.Estado" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-5">
-                        <label asp-for="Input.CategoriaFK" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-grid text-muted"></i></span>
-                            <select asp-for="Input.CategoriaFK" asp-items="Model.CategoriasList" class="form-select border-start-0 py-2" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
-                                <option value="">Escolhe uma subcategoria...</option>
-                            </select>
-                        </div>
-                        <span asp-validation-for="Input.CategoriaFK" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label asp-for="Input.Preco" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 fw-bold text-muted">€</span>
-                            <input asp-for="Input.Preco" class="form-control border-start-0 py-2" type="number" step="0.01" min="0.01" placeholder="0.00" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" />
-                        </div>
-                        <span asp-validation-for="Input.Preco" class="text-danger small"></span>
+                    <div>
+                        <h1 class="fw-extrabold h3 mb-1">Editar o teu Anúncio</h1>
+                        <p class="text-muted small mb-0">Atualiza os dados de venda, categoria, estado de desgaste ou foto do teu artigo.</p>
                     </div>
                 </div>
 
-                <!-- 2. Título -->
-                <div class="mb-4">
-                    <label asp-for="Input.Titulo" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                    <input asp-for="Input.Titulo" class="form-control py-2" placeholder="Ex: Computador Portátil Lenovo ThinkPad em bom estado" style="border-radius: var(--radius-md);" />
-                    <span asp-validation-for="Input.Titulo" class="text-danger small"></span>
-                </div>
-
-                <!-- 3. Descrição -->
-                <div class="mb-4">
-                    <label asp-for="Input.Descricao" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                    <textarea asp-for="Input.Descricao" rows="5" class="form-control" placeholder="Descreve o teu produto com clareza..." style="border-radius: var(--radius-md);"></textarea>
-                    <span asp-validation-for="Input.Descricao" class="text-danger small"></span>
-                </div>
-
-                <!-- 4. Estado do Produto -->
-                <div class="mb-4">
-                    <label asp-for="Input.EstadoProduto" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                    <select asp-for="Input.EstadoProduto" class="form-select py-2" style="border-radius: var(--radius-md);">
-                        <option value="0">Novo (na caixa selada)</option>
-                        <option value="1">Como Novo (sem marcas de uso)</option>
-                        <option value="2">Em Bom Estado (pequenas marcas normais)</option>
-                        <option value="3">Usado (marcas visíveis mas 100% funcional)</option>
-                        <option value="4">Para Peças (danificado ou não funcional)</option>
-                    </select>
-                    <span asp-validation-for="Input.EstadoProduto" class="text-danger small"></span>
-                </div>
-
-                <!-- 5. Foto Atual e Substituição -->
-                <div class="card border border-light bg-light p-4 mb-4" style="border-radius: var(--radius-lg);">
-                    <h6 class="fw-bold mb-3" style="color: var(--clr-primary);"><i class="bi bi-images"></i> Fotografia do Produto</h6>
-                    
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label asp-for="Input.ImagemFicheiro" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                            <input asp-for="Input.ImagemFicheiro" class="form-control py-2" type="file" accept="image/*" id="imageFileInput" style="border-radius: var(--radius-md);" />
-                            <div class="form-text small text-muted">Carrega um novo ficheiro para substituir a foto existente.</div>
+                @if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    <div class="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4" style="background-color: var(--clr-primary-light); color: var(--clr-primary) !important; border-radius: var(--radius-md);">
+                        <i class="bi bi-info-circle-fill fs-4" style="color: var(--clr-primary);"></i>
+                        <div class="text-dark">
+                            <strong>Modo de Demonstração Ativo:</strong> Estás a editar sem sessão iniciada. Tens permissão para modificar este anúncio porque ele pertence ao <strong>Vendedor Demo</strong>.
                         </div>
+                    </div>
+                }
+
+                <form method="post" enctype="multipart/form-data" class="needs-validation" id="editAdForm" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                    <input type="hidden" asp-for="Input.Id" />
+
+                    <!-- Secção A: Estado & Preço & Categoria -->
+                    <div class="card border-0 bg-light p-4 mb-4" style="border-radius: var(--radius-md);">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-info-circle me-2"></i>Estado de Comercialização</h5>
                         
-                        <div class="col-md-6">
-                            <label asp-for="Input.ImagemUrl" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                            <input asp-for="Input.ImagemUrl" class="form-control py-2" placeholder="https://exemplo.com/foto.jpg" id="imageUrlInput" style="border-radius: var(--radius-md);" />
-                            <div class="form-text small text-muted">Ou altera o link externo da imagem.</div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="Input.Estado" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-activity text-muted"></i></span>
+                                    <select asp-for="Input.Estado" id="adStatusInput" class="form-select border-start-0 py-2" required style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+                                        <option value="0">Disponível</option>
+                                        <option value="1">Reservado</option>
+                                        <option value="2">Vendido</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="Input.Estado" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-5">
+                                <label asp-for="Input.CategoriaFK" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-grid text-muted"></i></span>
+                                    <select asp-for="Input.CategoriaFK" id="adCategoryInput" asp-items="Model.CategoriasList" class="form-select border-start-0 py-2" required style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+                                        <option value="">Escolhe uma subcategoria...</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="Input.CategoriaFK" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label asp-for="Input.Preco" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 fw-bold text-muted">€</span>
+                                    <input asp-for="Input.Preco" id="adPriceInput" class="form-control border-start-0 py-2" type="number" step="0.01" min="0.01" required placeholder="0.00" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" />
+                                </div>
+                                <span asp-validation-for="Input.Preco" class="text-danger small"></span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Image Preview Area -->
-                    <div class="mt-4 text-center" id="imagePreviewContainer">
-                        <span class="d-block fw-bold small text-uppercase tracking-wider text-muted mb-2">Pré-visualização</span>
-                        <img id="imagePreview" src="@Model.Input.ImagemUrl" alt="Pré-visualização da imagem" class="img-thumbnail shadow-sm" style="max-height: 200px; object-fit: cover; border-radius: var(--radius-md); @(string.IsNullOrEmpty(Model.Input.ImagemUrl) ? "display:none;" : "")" />
-                    </div>
-                </div>
+                    <!-- Secção B: Título & Descrição & Wear -->
+                    <div class="card border-0 bg-light p-4 mb-4" style="border-radius: var(--radius-md);">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-file-text me-2"></i>Detalhes do Produto</h5>
 
-                <!-- Submit and Cancel Buttons -->
-                <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
-                    <a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="btn btn-premium-outline order-2 order-sm-1">
-                        <i class="bi bi-arrow-left-circle"></i> Voltar aos Detalhes
-                    </a>
-                    <button type="submit" class="btn btn-premium order-1 order-sm-2">
-                        <i class="bi bi-check-circle"></i> Guardar Alterações
-                    </button>
-                </div>
-            </form>
+                        <!-- Título -->
+                        <div class="mb-4">
+                            <label asp-for="Input.Titulo" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                            <input asp-for="Input.Titulo" id="adTitleInput" class="form-control py-2" required minlength="5" maxlength="100" placeholder="Ex: Computador Portátil Lenovo ThinkPad" style="border-radius: var(--radius-md);" />
+                            <span asp-validation-for="Input.Titulo" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Descrição -->
+                        <div class="mb-4">
+                            <label asp-for="Input.Descricao" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                            <textarea asp-for="Input.Descricao" rows="6" class="form-control" required minlength="15" maxlength="4000" placeholder="Descreve o teu produto com clareza..." style="border-radius: var(--radius-md);"></textarea>
+                            <span asp-validation-for="Input.Descricao" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Estado do Produto -->
+                        <div class="mb-2">
+                            <label asp-for="Input.EstadoProduto" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                            <select asp-for="Input.EstadoProduto" id="adWearInput" class="form-select py-2" required style="border-radius: var(--radius-md);">
+                                <option value="0">Novo (na caixa selada)</option>
+                                <option value="1">Como Novo (sem marcas de uso)</option>
+                                <option value="2">Em Bom Estado (pequenas marcas normais)</option>
+                                <option value="3">Usado (marcas visíveis mas 100% funcional)</option>
+                                <option value="4">Para Peças (danificado ou não funcional)</option>
+                            </select>
+                            <span asp-validation-for="Input.EstadoProduto" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Secção C: Foto -->
+                    <div class="card border border-light bg-light p-4 mb-4" style="border-radius: var(--radius-lg);">
+                        <h6 class="fw-bold mb-3" style="color: var(--clr-primary);"><i class="bi bi-images"></i> Fotografia do Produto</h6>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="Input.ImagemFicheiro" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                <input asp-for="Input.ImagemFicheiro" class="form-control py-2" type="file" accept="image/*" id="imageFileInput" style="border-radius: var(--radius-md);" />
+                                <div class="form-text small text-muted">Carrega um novo ficheiro para substituir a foto existente.</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label asp-for="Input.ImagemUrl" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                <input asp-for="Input.ImagemUrl" class="form-control py-2" placeholder="https://exemplo.com/foto.jpg" id="imageUrlInput" style="border-radius: var(--radius-md);" />
+                                <div class="form-text small text-muted">Ou altera o link de imagem externa.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit and Cancel Buttons -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
+                        <a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="btn btn-premium-outline order-2 order-sm-1">
+                            <i class="bi bi-arrow-left-circle"></i> Voltar aos Detalhes
+                        </a>
+                        <button type="submit" class="btn btn-premium order-1 order-sm-2">
+                            <i class="bi bi-check-circle"></i> Guardar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -148,42 +223,166 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        const fileInput = document.getElementById('imageFileInput');
-        const urlInput = document.getElementById('imageUrlInput');
-        const previewContainer = document.getElementById('imagePreviewContainer');
-        const previewImg = document.getElementById('imagePreview');
+        document.addEventListener("DOMContentLoaded", function() {
+            // Live Preview references
+            const previewTitle = document.getElementById('previewTitle');
+            const previewPrice = document.getElementById('previewPrice');
+            const previewCategory = document.getElementById('previewCategory');
+            const previewStatusBadge = document.getElementById('previewStatusBadge');
+            const previewWearBadge = document.getElementById('previewWearBadge');
 
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewImg.style.display = 'inline-block';
+            const previewImg = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('imagePlaceholder');
+            const errorState = document.getElementById('imagePreviewError');
+            const loadingState = document.getElementById('imageLoading');
+
+            // Inputs references
+            const adTitleInput = document.getElementById('adTitleInput');
+            const adPriceInput = document.getElementById('adPriceInput');
+            const adCategoryInput = document.getElementById('adCategoryInput');
+            const adStatusInput = document.getElementById('adStatusInput');
+            const adWearInput = document.getElementById('adWearInput');
+
+            const fileInput = document.getElementById('imageFileInput');
+            const urlInput = document.getElementById('imageUrlInput');
+
+            // 1. Text & Numbers live update
+            adTitleInput.addEventListener('input', function() {
+                previewTitle.textContent = this.value.trim() || 'Sem Título';
+            });
+
+            adPriceInput.addEventListener('input', function() {
+                const val = parseFloat(this.value);
+                previewPrice.textContent = isNaN(val) ? '0.00 €' : val.toFixed(2) + ' €';
+            });
+
+            adCategoryInput.addEventListener('change', function() {
+                const text = this.options[this.selectedIndex].text;
+                // Category format is usually Parent > Child, take last part
+                const cleanText = text.includes('>') ? text.split('>').pop().trim() : text;
+                previewCategory.textContent = cleanText || 'Artigos';
+            });
+
+            // 2. Wear badge live update
+            adWearInput.addEventListener('change', function() {
+                const text = this.options[this.selectedIndex].text;
+                previewWearBadge.textContent = text;
+                
+                // Color mapping
+                const wearVal = this.value;
+                if (wearVal === '0' || wearVal === '1') {
+                    previewWearBadge.className = "badge bg-dark px-3 py-2 shadow-sm rounded-pill";
+                } else if (wearVal === '2') {
+                    previewWearBadge.className = "badge bg-info text-dark px-3 py-2 shadow-sm rounded-pill";
+                } else if (wearVal === '3') {
+                    previewWearBadge.className = "badge bg-secondary px-3 py-2 shadow-sm rounded-pill";
+                } else {
+                    previewWearBadge.className = "badge bg-warning text-dark px-3 py-2 shadow-sm rounded-pill";
                 }
-                reader.readAsDataURL(file);
-                urlInput.value = ''; 
-            } else {
-                hidePreviewIfEmpty();
-            }
-        });
+            });
 
-        urlInput.addEventListener('input', function() {
-            const url = this.value.trim();
-            if (url) {
-                previewImg.src = url;
-                previewImg.style.display = 'inline-block';
-                fileInput.value = ''; 
-            } else {
-                hidePreviewIfEmpty();
-            }
-        });
+            // 3. Status badge live update
+            adStatusInput.addEventListener('change', function() {
+                const text = this.options[this.selectedIndex].text;
+                previewStatusBadge.textContent = text;
 
-        function hidePreviewIfEmpty() {
-            if (!fileInput.files[0] && !urlInput.value.trim()) {
-                previewImg.style.display = 'none';
-                previewImg.src = '';
+                const statusVal = this.value;
+                if (statusVal === '0') {
+                    previewStatusBadge.className = "badge bg-success px-3 py-2 shadow-sm rounded-pill text-uppercase tracking-wider fw-bold";
+                } else if (statusVal === '1') {
+                    previewStatusBadge.className = "badge bg-warning text-dark px-3 py-2 shadow-sm rounded-pill text-uppercase tracking-wider fw-bold";
+                } else {
+                    previewStatusBadge.className = "badge bg-danger px-3 py-2 shadow-sm rounded-pill text-uppercase tracking-wider fw-bold";
+                }
+            });
+
+            // 4. Image live preview
+            function showPreviewState(state) {
+                placeholder.classList.add('d-none');
+                loadingState.classList.add('d-none');
+                previewImg.classList.add('d-none');
+                errorState.classList.add('d-none');
+
+                if (state === 'placeholder') {
+                    placeholder.classList.remove('d-none');
+                } else if (state === 'loading') {
+                    loadingState.classList.remove('d-none');
+                } else if (state === 'success') {
+                    previewImg.classList.remove('d-none');
+                } else if (state === 'error') {
+                    errorState.classList.remove('d-none');
+                }
             }
-        }
+
+            function handleFileSelect(evt) {
+                const file = evt.target.files[0];
+                if (file) {
+                    showPreviewState('loading');
+                    urlInput.value = ''; // Clean external URL
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        previewImg.onload = function() {
+                            showPreviewState('success');
+                        };
+                        previewImg.onerror = function() {
+                            showPreviewState('error');
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    checkInputsAndPreview();
+                }
+            }
+
+            function handleUrlInput() {
+                const url = urlInput.value.trim();
+                if (url) {
+                    showPreviewState('loading');
+                    fileInput.value = ''; // Clean local file
+                    previewImg.src = url;
+                    previewImg.onload = function() {
+                        showPreviewState('success');
+                    };
+                    previewImg.onerror = function() {
+                        showPreviewState('error');
+                    };
+                } else {
+                    checkInputsAndPreview();
+                }
+            }
+
+            function checkInputsAndPreview() {
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        showPreviewState('success');
+                    };
+                    reader.readAsDataURL(file);
+                } else if (urlInput.value.trim()) {
+                    previewImg.src = urlInput.value.trim();
+                    showPreviewState('success');
+                } else {
+                    showPreviewState('placeholder');
+                }
+            }
+
+            fileInput.addEventListener('change', handleFileSelect);
+            urlInput.addEventListener('input', handleUrlInput);
+
+            // Run initial setup triggers
+            checkInputsAndPreview();
+            
+            // Trigger category & badge setup
+            if (adCategoryInput.selectedIndex >= 0) {
+                adCategoryInput.dispatchEvent(new Event('change'));
+            }
+            adWearInput.dispatchEvent(new Event('change'));
+            adStatusInput.dispatchEvent(new Event('change'));
+        });
     </script>
 }
+

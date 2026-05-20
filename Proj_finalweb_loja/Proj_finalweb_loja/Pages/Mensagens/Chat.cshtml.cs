@@ -171,7 +171,8 @@ namespace Proj_finalweb_loja.Pages.Mensagens
             _context.Mensagens.Add(novaMensagem);
             await _context.SaveChangesAsync();
 
-            return RedirectToPage("./Chat", new { anuncioId = AnuncioId, destinatarioId = RecipientId });
+            var isWidget = Request.Query["isWidget"] == "true";
+            return RedirectToPage("./Chat", new { anuncioId = AnuncioId, destinatarioId = RecipientId, isWidget = isWidget ? "true" : null });
         }
     }
 }

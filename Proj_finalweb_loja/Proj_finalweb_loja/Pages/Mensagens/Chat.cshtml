@@ -1,28 +1,36 @@
 @page
 @model Proj_finalweb_loja.Pages.Mensagens.ChatModel
 @{
+    var isWidget = Request.Query["isWidget"] == "true";
+    if (isWidget)
+    {
+        Layout = "_WidgetLayout";
+    }
     ViewData["Title"] = "Conversa com " + Model.Recipient.Nome;
 }
 
-<div class="row justify-content-center py-4">
-    <div class="col-lg-9">
+<div class="@(isWidget ? "w-100" : "row justify-content-center py-4")">
+    <div class="@(isWidget ? "w-100" : "col-lg-9")">
         
-        <!-- Breadcrumb navigation -->
-        <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
-                <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Mensagens</a></li>
-                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Conversa</li>
-            </ol>
-        </nav>
+        @if (!isWidget)
+        {
+            <!-- Breadcrumb navigation -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+                    <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Mensagens</a></li>
+                    <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Conversa</li>
+                </ol>
+            </nav>
+        }
 
         <!-- Chat Frame Container -->
-        <div class="bg-white border border-light shadow-sm" style="border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; min-height: 600px;">
+        <div class="bg-white border-0 @(isWidget ? "" : "border border-light shadow-sm")" style="border-radius: @(isWidget ? "0" : "var(--radius-lg)"); overflow: hidden; display: flex; flex-direction: column; min-height: @(isWidget ? "100vh" : "600px");">
             
             <!-- Chat Header (Recipient Details + Back Link) -->
-            <div class="p-3 border-bottom border-light bg-light d-flex align-items-center justify-content-between">
+            <div class="@(isWidget ? "p-2.5" : "p-3") border-bottom border-light bg-light d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-3">
-                    <a asp-page="./Index" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 50%;">
+                    <a asp-page="./Index" asp-route-isWidget="@(isWidget ? "true" : null)" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 50%;">
                         <i class="bi bi-arrow-left"></i>
                     </a>
                     
@@ -46,39 +54,39 @@
                 <!-- Mode Indicator -->
                 @if (!User.Identity?.IsAuthenticated ?? true)
                 {
-                    <span class="badge bg-warning-light text-warning px-2.5 py-1.5 small rounded-pill" style="background-color: rgba(245, 158, 11, 0.1); border-radius: var(--radius-sm);">
+                    <span class="badge bg-warning-light text-warning px-2 py-1 small rounded-pill" style="background-color: rgba(245, 158, 11, 0.1); border-radius: var(--radius-sm); font-size: @(isWidget ? "0.65rem" : "0.75rem");">
                         Modo Demo (João)
                     </span>
                 }
             </div>
 
             <!-- Context Banner (The negotiated Anuncio detail) -->
-            <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                <div class="d-flex align-items-center gap-3">
+            <div class="@(isWidget ? "p-2" : "p-3") border-bottom bg-white d-flex align-items-center justify-content-between gap-2 flex-wrap" style="font-size: @(isWidget ? "0.8rem" : "inherit");">
+                <div class="d-flex align-items-center gap-2">
                     @{
                         var adImg = Model.Anuncio.Imagens.FirstOrDefault(i => i.Principal)?.CaminhoFicheiro 
                                     ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
                     }
-                    <img src="@adImg" alt="@Model.Anuncio.Titulo" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);" />
+                    <img src="@adImg" alt="@Model.Anuncio.Titulo" class="img-thumbnail" style="width: @(isWidget ? "40px" : "50px"); height: @(isWidget ? "40px" : "50px"); object-fit: cover; border-radius: var(--radius-sm);" />
                     <div>
-                        <span class="text-muted small d-block">Negociação de:</span>
-                        <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 250px;">@Model.Anuncio.Titulo</h6>
+                        <span class="text-muted small d-block" style="font-size: @(isWidget ? "0.65rem" : "inherit");">Artigo:</span>
+                        <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: @(isWidget ? "110px" : "250px"); font-size: @(isWidget ? "0.8rem" : "inherit");">@Model.Anuncio.Titulo</h6>
                     </div>
                 </div>
                 
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
                     <div class="text-end">
-                        <span class="text-muted small d-block">Preço Pretendido</span>
-                        <h5 class="fw-extrabold mb-0 text-primary" style="font-size: 1.1rem;">@Model.Anuncio.Preco.ToString("N2") €</h5>
+                        <span class="text-muted small d-block" style="font-size: @(isWidget ? "0.65rem" : "inherit");">Preço:</span>
+                        <h5 class="fw-extrabold mb-0 text-primary" style="font-size: @(isWidget ? "0.85rem" : "1.1rem");">@Model.Anuncio.Preco.ToString("N2") €</h5>
                     </div>
-                    <a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="btn btn-sm btn-premium-outline">
-                        <i class="bi bi-eye"></i> Ver Artigo
+                    <a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="btn btn-sm btn-premium-outline @(isWidget ? "px-2 py-1" : "")" style="@(isWidget ? "font-size: 0.75rem;" : "")" target="_parent">
+                        <i class="bi bi-eye"></i> @(isWidget ? "Ver" : "Ver Artigo")
                     </a>
                 </div>
             </div>
 
             <!-- Messages Log (Scrollable) -->
-            <div class="p-4 flex-grow-1" id="chatMessagesContainer" style="background-color: #f8fafc; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 1rem;">
+            <div class="@(isWidget ? "p-3" : "p-4") flex-grow-1" id="chatMessagesContainer" style="background-color: #f8fafc; overflow-y: auto; max-height: @(isWidget ? "calc(100vh - 180px)" : "400px"); display: flex; flex-direction: column; gap: @(isWidget ? "0.75rem" : "1rem");">
                 @if (!Model.Mensagens.Any())
                 {
                     <div class="text-center my-auto py-5 text-muted">
@@ -123,15 +131,15 @@
             </div>
 
             <!-- Chat Send Input Form -->
-            <div class="p-3 border-top bg-light">
-                <form method="post" class="needs-validation" novalidate id="chatForm">
+            <div class="@(isWidget ? "p-2" : "p-3") border-top bg-light">
+                <form method="post" asp-route-isWidget="@(isWidget ? "true" : null)" class="needs-validation" novalidate id="chatForm">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
                     <input type="hidden" asp-for="AnuncioId" />
                     <input type="hidden" asp-for="RecipientId" />
                     
                     <div class="input-group">
-                        <input asp-for="NovoConteudo" class="form-control py-2.5 border-end-0" placeholder="Escreve uma mensagem..." autocomplete="off" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--clr-border);" id="chatMessageInput" required />
-                        <button type="submit" class="btn btn-premium px-4" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+                        <input asp-for="NovoConteudo" class="form-control @(isWidget ? "py-2" : "py-2.5") border-end-0" placeholder="Escreve uma mensagem..." autocomplete="off" style="border-radius: var(--radius-md) 0 0 var(--radius-md); border-color: var(--clr-border);" id="chatMessageInput" required />
+                        <button type="submit" class="btn btn-premium @(isWidget ? "px-3" : "px-4")" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
                             <i class="bi bi-send-fill"></i>
                         </button>
                     </div>

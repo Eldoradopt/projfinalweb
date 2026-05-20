@@ -419,3 +419,287 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.85rem;
     color: var(--clr-text-muted);
 }
+
+/* Custom Helper for text break */
+.text-break-all {
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* User Profile Dropdown Styling */
+.profile-dropdown-btn {
+    background: transparent;
+    border: 1px solid var(--clr-border);
+    border-radius: 50px;
+    padding: 0.25rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.profile-dropdown-btn:hover {
+    background-color: var(--clr-primary-light);
+    border-color: var(--clr-primary);
+}
+
+.profile-dropdown-menu {
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--clr-border) !important;
+    box-shadow: var(--shadow-lg) !important;
+    padding: 0.5rem !important;
+    min-width: 220px !important;
+}
+
+.profile-dropdown-item {
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 1rem;
+    font-weight: 500;
+    color: var(--clr-text-main) !important;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.profile-dropdown-item:hover {
+    background-color: var(--clr-primary-light);
+    color: var(--clr-primary) !important;
+}
+
+/* Multi-Step Creation Form Stepper */
+.stepper-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin-bottom: 2.5rem;
+}
+
+.stepper-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 3px;
+    background-color: var(--clr-border);
+    width: 100%;
+    z-index: 1;
+    transform: translateY(-50%);
+}
+
+.stepper-line-active {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--clr-primary), var(--clr-secondary));
+    width: 0%;
+    z-index: 1;
+    transform: translateY(-50%);
+    transition: width 0.4s ease;
+}
+
+.step-item {
+    position: relative;
+    z-index: 2;
+    background-color: var(--clr-surface);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 3px solid var(--clr-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--clr-text-muted);
+    transition: var(--transition);
+}
+
+.step-item.active {
+    border-color: var(--clr-primary);
+    color: var(--clr-primary);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+}
+
+.step-item.completed {
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));
+    border-color: var(--clr-primary);
+    color: white;
+}
+
+.step-label {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--clr-text-muted);
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.step-item.active .step-label, .step-item.completed .step-label {
+    color: var(--clr-text-main);
+    font-weight: 700;
+}
+
+.step-pane {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.step-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Floating Chat Bubble Widget Styles */
+.chat-bubble-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    font-family: var(--font-primary);
+}
+
+.chat-bubble-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.chat-bubble-toggle:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+}
+
+.chat-bubble-toggle .chat-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--clr-danger);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.chat-window {
+    width: 380px;
+    height: 520px;
+    position: fixed;
+    bottom: 105px;
+    right: 30px;
+    background-color: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 9999;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.chat-window-header {
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));
+    color: white;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.btn-close-chat {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-close-chat:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.chat-window-body {
+    flex-grow: 1;
+    position: relative;
+    background-color: #f8fafc;
+}
+
+/* Tabs Navigation in Unified Profile Dashboard */
+.profile-tabs-nav {
+    border-bottom: 2px solid var(--clr-border);
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.profile-tab-link {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 0.5rem;
+    font-weight: 600;
+    color: var(--clr-text-muted);
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-tab-link:hover, .profile-tab-link.active {
+    color: var(--clr-primary);
+}
+
+.profile-tab-link.active {
+    border-bottom-color: var(--clr-primary);
+}
+
+.profile-tab-pane {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.profile-tab-pane.active {
+    display: block;
+}

@@ -15,15 +15,34 @@
             </ol>
         </nav>
 
-        <!-- Card Container -->
+        <!-- Stepper Dashboard Card -->
         <div class="bg-white border border-light p-4 p-md-5 shadow-sm" style="border-radius: var(--radius-lg);">
-            <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="d-flex align-items-center gap-3 mb-5">
                 <div class="bg-primary-light rounded-circle p-3 text-primary d-flex align-items-center justify-content-center" style="background-color: var(--clr-primary-light); width: 60px; height: 60px;">
                     <i class="bi bi-tag fs-2" style="color: var(--clr-primary);"></i>
                 </div>
                 <div>
                     <h1 class="fw-extrabold h3 mb-1">Publicar Novo Anúncio</h1>
-                    <p class="text-muted small mb-0">Preenche os campos abaixo para divulgar o teu artigo a toda a comunidade do IPT.</p>
+                    <p class="text-muted small mb-0">Segue os 3 passos simples para divulgar o teu artigo a toda a comunidade do IPT.</p>
+                </div>
+            </div>
+
+            <!-- Visual Stepper Progress -->
+            <div class="stepper-container">
+                <div class="stepper-line"></div>
+                <div class="stepper-line-active" id="stepperLineActive" style="width: 0%;"></div>
+                
+                <div class="step-item active" id="stepIndicator1">
+                    1
+                    <span class="step-label">Categoria & Título</span>
+                </div>
+                <div class="step-item" id="stepIndicator2">
+                    2
+                    <span class="step-label">Descrição & Estado</span>
+                </div>
+                <div class="step-item" id="stepIndicator3">
+                    3
+                    <span class="step-label">Fotos & Tags</span>
                 </div>
             </div>
             
@@ -37,122 +56,173 @@
                 </div>
             }
 
-            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <form method="post" enctype="multipart/form-data" class="needs-validation" id="createAdForm" novalidate>
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
-                <!-- 1. Categoria & Preço Row -->
-                <div class="row g-4 mb-4">
-                    <div class="col-md-7">
-                        <label asp-for="Input.CategoriaFK" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-grid text-muted"></i></span>
-                            <select asp-for="Input.CategoriaFK" asp-items="Model.CategoriasList" class="form-select border-start-0 py-2" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
-                                <option value="">Escolhe uma subcategoria...</option>
-                            </select>
-                        </div>
-                        <span asp-validation-for="Input.CategoriaFK" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-5">
-                        <label asp-for="Input.Preco" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0 fw-bold text-muted">€</span>
-                            <input asp-for="Input.Preco" class="form-control border-start-0 py-2" type="number" step="0.01" min="0.01" placeholder="0.00" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" />
-                        </div>
-                        <span asp-validation-for="Input.Preco" class="text-danger small"></span>
-                    </div>
-                </div>
-
-                <!-- 2. Título -->
-                <div class="mb-4">
-                    <label asp-for="Input.Titulo" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                    <input asp-for="Input.Titulo" class="form-control py-2" placeholder="Ex: Computador Portátil Lenovo ThinkPad em bom estado" style="border-radius: var(--radius-md);" />
-                    <span asp-validation-for="Input.Titulo" class="text-danger small"></span>
-                </div>
-
-                <!-- 3. Descrição -->
-                <div class="mb-4">
-                    <label asp-for="Input.Descricao" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                    <textarea asp-for="Input.Descricao" rows="5" class="form-control" placeholder="Descreve o teu produto. Inclui detalhes como: marcas de uso, acessórios incluídos, motivos da venda, onde podes entregar em Tomar..." style="border-radius: var(--radius-md);"></textarea>
-                    <span asp-validation-for="Input.Descricao" class="text-danger small"></span>
-                </div>
-
-                <!-- 4. Estado do Produto (Enum Select) -->
-                <div class="mb-4">
-                    <label asp-for="Input.EstadoProduto" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                    <select asp-for="Input.EstadoProduto" class="form-select py-2" style="border-radius: var(--radius-md);">
-                        <option value="0">Novo (na caixa selada)</option>
-                        <option value="1">Como Novo (sem marcas de uso)</option>
-                        <option value="2">Em Bom Estado (pequenas marcas normais)</option>
-                        <option value="3">Usado (marcas visíveis mas 100% funcional)</option>
-                        <option value="4">Para Peças (danificado ou não funcional)</option>
-                    </select>
-                    <span asp-validation-for="Input.EstadoProduto" class="text-danger small"></span>
-                </div>
-
-                <!-- 5. Upload / Imagem -->
-                <div class="card border border-light bg-light p-4 mb-4" style="border-radius: var(--radius-lg);">
-                    <h6 class="fw-bold mb-3" style="color: var(--clr-primary);"><i class="bi bi-images"></i> Fotografia do Produto</h6>
-                    
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label asp-for="Input.ImagemFicheiro" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                            <input asp-for="Input.ImagemFicheiro" class="form-control py-2" type="file" accept="image/*" id="imageFileInput" style="border-radius: var(--radius-md);" />
-                            <div class="form-text small text-muted">Carrega um ficheiro do teu computador (PNG, JPG).</div>
-                        </div>
+                <!-- PASSO 1: Categoria, Preço, Título -->
+                <div class="step-pane active" id="pane1">
+                    <div class="card border-0 bg-light p-4 mb-4" style="border-radius: var(--radius-md);">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-info-circle me-2"></i>Informações Iniciais</h5>
                         
-                        <div class="col-md-6">
-                            <label asp-for="Input.ImagemUrl" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                            <input asp-for="Input.ImagemUrl" class="form-control py-2" placeholder="https://exemplo.com/foto.jpg" id="imageUrlInput" style="border-radius: var(--radius-md);" />
-                            <div class="form-text small text-muted">Ou cola um link de imagem direta da internet.</div>
-                        </div>
-                    </div>
+                        <!-- Categoria & Preço Row -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-7">
+                                <label asp-for="Input.CategoriaFK" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-grid text-muted"></i></span>
+                                    <select asp-for="Input.CategoriaFK" asp-items="Model.CategoriasList" class="form-select border-start-0 py-2" required style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+                                        <option value="">Escolhe uma subcategoria...</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="Input.CategoriaFK" class="text-danger small"></span>
+                            </div>
 
-                    <!-- Image Preview Area -->
-                    <div class="mt-4 text-center d-none" id="imagePreviewContainer">
-                        <span class="d-block fw-bold small text-uppercase tracking-wider text-muted mb-2">Pré-visualização</span>
-                        <img id="imagePreview" src="#" alt="Pré-visualização da imagem" class="img-thumbnail shadow-sm" style="max-height: 200px; object-fit: cover; border-radius: var(--radius-md);" />
-                    </div>
-                </div>
-
-                <!-- 6. Tags -->
-                <div class="mb-4">
-                    <label asp-for="Input.TagsInput" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
-                    <input asp-for="Input.TagsInput" id="tagsInput" class="form-control py-2" placeholder="Ex: Apple, iPhone, Gaming, Promoção (separadas por vírgula)" style="border-radius: var(--radius-md);" />
-                    <span asp-validation-for="Input.TagsInput" class="text-danger small"></span>
-                    
-                    @if (Model.TodasAsTags != null && Model.TodasAsTags.Any())
-                    {
-                        <div class="mt-2">
-                            <span class="d-block text-muted small mb-2"><i class="bi bi-lightbulb-fill text-warning"></i> Tags existentes (clica para adicionar/remover):</span>
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach (var tag in Model.TodasAsTags)
-                                {
-                                    <button type="button" class="btn btn-sm btn-light border tag-suggestion-btn py-1 px-3" data-tag-name="@tag.Nome" style="border-radius: 20px; font-size: 0.8rem;">
-                                        @if (tag.EColecaoEspecial)
-                                        {
-                                            <i class="bi bi-@(tag.Icone ?? "star-fill") me-1" style="color: @(tag.CorHex ?? "var(--clr-primary)");"></i>
-                                        }
-                                        else
-                                        {
-                                            <i class="bi bi-tag-fill text-muted me-1"></i>
-                                        }
-                                        @tag.Nome
-                                    </button>
-                                }
+                            <div class="col-md-5">
+                                <label asp-for="Input.Preco" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 fw-bold text-muted">€</span>
+                                    <input asp-for="Input.Preco" class="form-control border-start-0 py-2" type="number" step="0.01" min="0.01" required placeholder="0.00" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" />
+                                </div>
+                                <span asp-validation-for="Input.Preco" class="text-danger small"></span>
                             </div>
                         </div>
-                    }
+
+                        <!-- Título -->
+                        <div class="mb-2">
+                            <label asp-for="Input.Titulo" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                            <input asp-for="Input.Titulo" class="form-control py-2" required minlength="5" maxlength="100" placeholder="Ex: Computador Portátil Lenovo ThinkPad em bom estado" style="border-radius: var(--radius-md);" />
+                            <span asp-validation-for="Input.Titulo" class="text-danger small"></span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Submit and Cancel Buttons -->
-                <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
-                    <a asp-page="/Index" class="btn btn-premium-outline order-2 order-sm-1">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-premium order-1 order-sm-2">
-                        <i class="bi bi-check-circle"></i> Publicar Anúncio
-                    </button>
+                <!-- PASSO 2: Descrição, Estado de Desgaste -->
+                <div class="step-pane" id="pane2">
+                    <div class="card border-0 bg-light p-4 mb-4" style="border-radius: var(--radius-md);">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-file-text me-2"></i>Detalhes do Artigo</h5>
+                        
+                        <!-- Descrição -->
+                        <div class="mb-4">
+                            <label asp-for="Input.Descricao" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                            <textarea asp-for="Input.Descricao" rows="6" class="form-control" required minlength="15" maxlength="4000" placeholder="Descreve o teu produto. Inclui detalhes como: marcas de uso, acessórios incluídos, motivos da venda, onde podes entregar em Tomar..." style="border-radius: var(--radius-md);"></textarea>
+                            <span asp-validation-for="Input.Descricao" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Estado do Produto (Enum Select) -->
+                        <div class="mb-2">
+                            <label asp-for="Input.EstadoProduto" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                            <select asp-for="Input.EstadoProduto" class="form-select py-2" required style="border-radius: var(--radius-md);">
+                                <option value="0">Novo (na caixa selada)</option>
+                                <option value="1">Como Novo (sem marcas de uso)</option>
+                                <option value="2">Em Bom Estado (pequenas marcas normais)</option>
+                                <option value="3">Usado (marcas visíveis mas 100% funcional)</option>
+                                <option value="4">Para Peças (danificado ou não funcional)</option>
+                            </select>
+                            <span asp-validation-for="Input.EstadoProduto" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASSO 3: Mídia e Tags -->
+                <div class="step-pane" id="pane3">
+                    <div class="card border-0 bg-light p-4 mb-4" style="border-radius: var(--radius-md);">
+                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-images me-2"></i>Fotografia & Identificação</h5>
+                        
+                        <!-- Media Section -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Input.ImagemFicheiro" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                    <input asp-for="Input.ImagemFicheiro" class="form-control py-2" type="file" accept="image/*" id="imageFileInput" style="border-radius: var(--radius-md);" />
+                                    <div class="form-text small text-muted">Carrega um ficheiro do teu dispositivo (PNG, JPG).</div>
+                                </div>
+                                
+                                <div>
+                                    <label asp-for="Input.ImagemUrl" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                                    <input asp-for="Input.ImagemUrl" class="form-control py-2" placeholder="https://exemplo.com/foto.jpg" id="imageUrlInput" style="border-radius: var(--radius-md);" />
+                                    <div class="form-text small text-muted">Ou cola um link direto de imagem da internet.</div>
+                                </div>
+                            </div>
+
+                            <!-- Live Reactive Preview Panel -->
+                            <div class="col-md-6 d-flex flex-column justify-content-center align-items-center">
+                                <span class="fw-bold small text-uppercase tracking-wider text-muted mb-2">Pré-visualização do Artigo</span>
+                                <div class="bg-white border rounded p-2 text-center d-flex align-items-center justify-content-center shadow-sm position-relative overflow-hidden" 
+                                     style="min-width: 100%; min-height: 200px; max-height: 230px; border-radius: var(--radius-md);">
+                                    
+                                    <!-- Fallback / Placeholder -->
+                                    <div id="imagePlaceholder" class="text-muted p-4">
+                                        <i class="bi bi-image fs-1 d-block mb-2 text-muted-light" style="opacity: 0.5;"></i>
+                                        <span class="small d-block text-secondary">Nenhuma imagem carregada</span>
+                                    </div>
+
+                                    <!-- Loading State -->
+                                    <div id="imageLoading" class="position-absolute top-50 start-50 translate-middle d-none">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    </div>
+
+                                    <!-- Reactive Image -->
+                                    <img id="imagePreview" src="#" alt="Pré-visualização" class="img-fluid d-none" style="max-height: 210px; object-fit: contain; border-radius: 4px;" />
+                                    
+                                    <!-- Error State -->
+                                    <div id="imagePreviewError" class="text-danger p-4 d-none">
+                                        <i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i>
+                                        <span class="small d-block fw-semibold">Falha ao carregar a imagem externa. Certifica-te de que o link é direto e válido.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="mb-2">
+                            <label asp-for="Input.TagsInput" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                            <input asp-for="Input.TagsInput" id="tagsInput" class="form-control py-2" placeholder="Ex: Apple, iPhone, Gaming, Promoção (separadas por vírgula)" style="border-radius: var(--radius-md);" />
+                            <span asp-validation-for="Input.TagsInput" class="text-danger small"></span>
+                            
+                            @if (Model.TodasAsTags != null && Model.TodasAsTags.Any())
+                            {
+                                <div class="mt-3">
+                                    <span class="d-block text-muted small mb-2"><i class="bi bi-lightbulb-fill text-warning"></i> Tags sugeridas (clica para adicionar/remover):</span>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach (var tag in Model.TodasAsTags.Take(12))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-light border tag-suggestion-btn py-1 px-3" data-tag-name="@tag.Nome" style="border-radius: 20px; font-size: 0.8rem; transition: all 0.2s ease;">
+                                                @if (tag.EColecaoEspecial)
+                                                {
+                                                    <i class="bi bi-@(tag.Icone ?? "star-fill") me-1" style="color: @(tag.CorHex ?? "var(--clr-primary)");"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-tag-fill text-muted me-1"></i>
+                                                }
+                                                @tag.Nome
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step Controller Navigation Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                        <button type="button" class="btn btn-premium-outline d-none" id="btnPrev" style="transition: all 0.3s ease;">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </button>
+                        <a asp-page="/Index" class="btn btn-light border text-muted" id="btnCancel">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-premium" id="btnNext" style="transition: all 0.3s ease;">
+                            Seguinte <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="btn btn-premium d-none" id="btnSubmit" style="transition: all 0.3s ease;">
+                            <i class="bi bi-check-circle-fill"></i> Publicar Anúncio
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -163,64 +233,261 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // Simple JS for Image Preview
-        const fileInput = document.getElementById('imageFileInput');
-        const urlInput = document.getElementById('imageUrlInput');
-        const previewContainer = document.getElementById('imagePreviewContainer');
-        const previewImg = document.getElementById('imagePreview');
+        document.addEventListener("DOMContentLoaded", function() {
+            let currentStep = 1;
+            const totalSteps = 3;
 
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewContainer.classList.remove('d-none');
+            // Form references
+            const form = document.getElementById('createAdForm');
+            const stepperLine = document.getElementById('stepperLineActive');
+            
+            // Pane buttons
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            const btnCancel = document.getElementById('btnCancel');
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            // Set stepper line width based on active step
+            function updateStepperUI() {
+                // Update Line
+                let percentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+                stepperLine.style.width = percentage + "%";
+
+                // Update Indicator circles
+                for (let i = 1; i <= totalSteps; i++) {
+                    const indicator = document.getElementById('stepIndicator' + i);
+                    if (i < currentStep) {
+                        indicator.classList.remove('active');
+                        indicator.classList.add('completed');
+                    } else if (i === currentStep) {
+                        indicator.classList.add('active');
+                        indicator.classList.remove('completed');
+                    } else {
+                        indicator.classList.remove('active', 'completed');
+                    }
                 }
-                reader.readAsDataURL(file);
-                urlInput.value = ''; // Clear URL input if file is picked
-            } else {
-                hidePreviewIfEmpty();
-            }
-        });
 
-        urlInput.addEventListener('input', function() {
-            const url = this.value.trim();
-            if (url) {
-                previewImg.src = url;
-                previewContainer.classList.remove('d-none');
-                fileInput.value = ''; // Clear File input if URL is entered
-            } else {
-                hidePreviewIfEmpty();
-            }
-        });
+                // Toggle steps panes
+                for (let i = 1; i <= totalSteps; i++) {
+                    const pane = document.getElementById('pane' + i);
+                    if (i === currentStep) {
+                        pane.classList.add('active');
+                    } else {
+                        pane.classList.remove('active');
+                    }
+                }
 
-        // Simple JS for Tag suggestions helper
-        const tagsInput = document.getElementById('tagsInput');
-        const suggestionBtns = document.querySelectorAll('.tag-suggestion-btn');
-
-        suggestionBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tagName = this.getAttribute('data-tag-name');
-                let currentVal = tagsInput.value.trim();
-                
-                // Parse existing tags
-                let tags = currentVal ? currentVal.split(',').map(t => t.trim()) : [];
-                
-                // If tag not already in list, add it
-                if (!tags.some(t => t.toLowerCase() === tagName.toLowerCase())) {
-                    tags.push(tagName);
-                    tagsInput.value = tags.join(', ');
-                    this.classList.remove('btn-light');
-                    this.classList.add('btn-primary', 'text-white');
+                // Show/Hide buttons
+                if (currentStep === 1) {
+                    btnPrev.classList.add('d-none');
+                    btnCancel.classList.remove('d-none');
+                    btnNext.classList.remove('d-none');
+                    btnSubmit.classList.add('d-none');
+                } else if (currentStep === totalSteps) {
+                    btnPrev.classList.remove('d-none');
+                    btnCancel.classList.add('d-none');
+                    btnNext.classList.add('d-none');
+                    btnSubmit.classList.remove('d-none');
                 } else {
-                    // Remove tag if clicked again (toggle behavior)
-                    tags = tags.filter(t => t.toLowerCase() !== tagName.toLowerCase());
-                    tagsInput.value = tags.join(', ');
-                    this.classList.remove('btn-primary', 'text-white');
-                    this.classList.add('btn-light');
+                    btnPrev.classList.remove('d-none');
+                    btnCancel.classList.add('d-none');
+                    btnNext.classList.remove('d-none');
+                    btnSubmit.classList.add('d-none');
+                }
+            }
+
+            // Client-side validator for specific fields inside step pane
+            function validateStep(step) {
+                const pane = document.getElementById('pane' + step);
+                const inputs = pane.querySelectorAll('input, select, textarea');
+                let stepValid = true;
+
+                inputs.forEach(input => {
+                    // Check if it's native HTML5 valid (required, minlength, type, etc.)
+                    if (!input.checkValidity()) {
+                        stepValid = false;
+                        input.classList.add('is-invalid');
+                        
+                        // Add live checking to remove the is-invalid class as they type
+                        input.addEventListener('input', function() {
+                            if (input.checkValidity()) {
+                                input.classList.remove('is-invalid');
+                            }
+                        }, { once: true });
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+
+                if (!stepValid) {
+                    const firstInvalid = pane.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        firstInvalid.reportValidity();
+                    }
+                }
+
+                return stepValid;
+            }
+
+            btnNext.addEventListener('click', function() {
+                if (validateStep(currentStep)) {
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        updateStepperUI();
+                    }
                 }
             });
+
+            btnPrev.addEventListener('click', function() {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateStepperUI();
+                }
+            });
+
+            // Prevent default post submit if invalid
+            form.addEventListener('submit', function(event) {
+                // Validate the final step just in case
+                if (!validateStep(currentStep)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            });
+
+            // --- REACTIVE PREVIEW JS FOR IMAGES ---
+            const fileInput = document.getElementById('imageFileInput');
+            const urlInput = document.getElementById('imageUrlInput');
+            const previewImg = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('imagePlaceholder');
+            const errorState = document.getElementById('imagePreviewError');
+            const loadingState = document.getElementById('imageLoading');
+
+            function showPreviewState(state) {
+                // state can be: 'placeholder', 'loading', 'success', 'error'
+                placeholder.classList.add('d-none');
+                loadingState.classList.add('d-none');
+                previewImg.classList.add('d-none');
+                errorState.classList.add('d-none');
+
+                if (state === 'placeholder') {
+                    placeholder.classList.remove('d-none');
+                } else if (state === 'loading') {
+                    loadingState.classList.remove('d-none');
+                } else if (state === 'success') {
+                    previewImg.classList.remove('d-none');
+                } else if (state === 'error') {
+                    errorState.classList.remove('d-none');
+                }
+            }
+
+            function handleFileSelect(evt) {
+                const file = evt.target.files[0];
+                if (file) {
+                    showPreviewState('loading');
+                    urlInput.value = ''; // Clean external URL field to prevent conflict
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        // wait for image to load to verify it is a valid image
+                        previewImg.onload = function() {
+                            showPreviewState('success');
+                        };
+                        previewImg.onerror = function() {
+                            showPreviewState('error');
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    checkInputsAndPreview();
+                }
+            }
+
+            function handleUrlInput() {
+                const url = urlInput.value.trim();
+                if (url) {
+                    showPreviewState('loading');
+                    fileInput.value = ''; // Clean local file field
+                    previewImg.src = url;
+                    previewImg.onload = function() {
+                        showPreviewState('success');
+                    };
+                    previewImg.onerror = function() {
+                        showPreviewState('error');
+                    };
+                } else {
+                    checkInputsAndPreview();
+                }
+            }
+
+            function checkInputsAndPreview() {
+                if (fileInput.files && fileInput.files[0]) {
+                    // Re-trigger file preview
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        showPreviewState('success');
+                    };
+                    reader.readAsDataURL(file);
+                } else if (urlInput.value.trim()) {
+                    previewImg.src = urlInput.value.trim();
+                    showPreviewState('success');
+                } else {
+                    showPreviewState('placeholder');
+                }
+            }
+
+            fileInput.addEventListener('change', handleFileSelect);
+            urlInput.addEventListener('input', handleUrlInput);
+
+            // --- TAG SUGGESTIONS HELPER ---
+            const tagsInput = document.getElementById('tagsInput');
+            const suggestionBtns = document.querySelectorAll('.tag-suggestion-btn');
+
+            // Check current tags on input and paint matching suggestion buttons
+            function highlightSuggestions() {
+                const currentVal = tagsInput.value.trim();
+                const tags = currentVal ? currentVal.split(',').map(t => t.trim().toLowerCase()) : [];
+                
+                suggestionBtns.forEach(btn => {
+                    const tagName = btn.getAttribute('data-tag-name').toLowerCase();
+                    if (tags.includes(tagName)) {
+                        btn.classList.remove('btn-light');
+                        btn.classList.add('btn-primary', 'text-white');
+                    } else {
+                        btn.classList.remove('btn-primary', 'text-white');
+                        btn.classList.add('btn-light');
+                    }
+                });
+            }
+
+            tagsInput.addEventListener('input', highlightSuggestions);
+
+            suggestionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tagName = this.getAttribute('data-tag-name');
+                    let currentVal = tagsInput.value.trim();
+                    let tags = currentVal ? currentVal.split(',').map(t => t.trim()) : [];
+                    
+                    const lowerTag = tagName.toLowerCase();
+                    const index = tags.findIndex(t => t.toLowerCase() === lowerTag);
+                    
+                    if (index === -1) {
+                        tags.push(tagName);
+                    } else {
+                        tags.splice(index, 1);
+                    }
+                    
+                    tagsInput.value = tags.join(', ');
+                    highlightSuggestions();
+                });
+            });
+
+            // Initialize Suggestions
+            highlightSuggestions();
         });
     </script>
 }
+
