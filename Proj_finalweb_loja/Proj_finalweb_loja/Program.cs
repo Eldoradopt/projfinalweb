@@ -18,7 +18,6 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -40,13 +39,16 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
-// Seed database on startup
+// Aplicar migrações e semear a base de dados no arranque
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
+        // Aplica automaticamente quaisquer migrações pendentes (necessário no servidor de produção)
+        await context.Database.MigrateAsync();
+
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         await DbInitializer.SeedDataAsync(context, userManager, roleManager);
@@ -54,7 +56,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocorreu um erro ao semear a base de dados.");
+        logger.LogError(ex, "Ocorreu um erro ao migrar ou semear a base de dados.");
     }
 }
 
