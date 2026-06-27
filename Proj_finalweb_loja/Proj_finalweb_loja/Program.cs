@@ -14,6 +14,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR(); // Adicionado para suportar funcionalidades em tempo real (Chat)
 
 var app = builder.Build();
 
@@ -33,11 +34,15 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseAuthentication(); // Adicionado: Essencial para o Identity processar o utilizador antes da Autorização
 app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+// Mapeamento do endpoint do SignalR (Substitui o ChatHub pelo nome correto da tua classe Hub se for diferente)
+app.MapHub<ChatHub>("/chatHub"); 
 
 // Seed database on startup
 using (var scope = app.Services.CreateScope())

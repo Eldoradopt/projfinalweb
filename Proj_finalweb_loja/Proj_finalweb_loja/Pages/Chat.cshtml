@@ -1,0 +1,85 @@
+@page
+@model Proj_finalweb_loja.Pages.ChatModel
+@{
+    ViewData["Title"] = "Chat em Tempo Real";
+}
+
+<div class="container mt-4">
+    <h2>Chat de Apoio ao Cliente</h2>
+    
+    <div class="card">
+        <div class="card-body" id="messagesList" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; background-color: #f9f9f9; padding: 15px;">
+            @if (Model.HistoricoMensagens != null)
+            {
+                @foreach (var msg in Model.HistoricoMensagens)
+                {
+                    <div class="mb-2">
+                        <strong>@(msg.Remetente?.UserName ?? msg.RemetenteFK):</strong> <span>@msg.Conteudo</span>
+                    </div>
+                }
+            }
+        </div>
+        <div class="card-footer">
+            <form id="chatForm">
+                <div class="input-group">
+                    <input type="hidden" id="userInput" value="@Model.RemetenteId" />
+                    <input type="hidden" id="destinatarioInput" value="@Model.DestinatarioId" />
+                    <input type="hidden" id="anuncioInput" value="@Model.AnuncioId" />
+                    <input type="text" id="messageInput" class="form-control" placeholder="Escreve uma mensagem..." autocomplete="off" />
+                    <button class="btn btn-primary" id="sendButton" type="submit">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveMessage", function (user, message) {
+            const messagesList = document.getElementById("messagesList");
+            if (messagesList) {
+                const msgHtml = `<div class="mb-2"><strong>${user}:</strong> <span>${message}</span></div>`;
+                messagesList.insertAdjacentHTML('beforeend', msgHtml);
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+        });
+
+        connection.start()
+            .then(() => console.log("SignalR: Ligado com sucesso!"))
+            .catch(err => console.error("SignalR Erro:", err.toString()));
+
+        const chatForm = document.getElementById("chatForm");
+        if (chatForm) {
+            chatForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const messageInput = document.getElementById("messageInput");
+                const destinatarioInput = document.getElementById("destinatarioInput");
+                const anuncioInput = document.getElementById("anuncioInput");
+
+                if (!messageInput || !messageInput.value.trim()) return;
+
+                const mensagem = messageInput.value;
+                const destinatarioId = destinatarioInput ? destinatarioInput.value : "";
+                
+                // Força a conversão correta para int do ID do Anúncio
+                const adId = parseInt(anuncioInput ? anuncioInput.value : "0", 10) || 0;
+
+                console.log("A enviar para o Hub:", destinatarioId, adId, mensagem);
+
+                connection.invoke("SendMessage", destinatarioId, adId, mensagem)
+                    .then(() => {
+                        messageInput.value = "";
+                        messageInput.focus();
+                    })
+                    .catch(err => console.error("Erro ao invocar SendMessage:", err.toString()));
+            });
+        }
+    </script>
+}
