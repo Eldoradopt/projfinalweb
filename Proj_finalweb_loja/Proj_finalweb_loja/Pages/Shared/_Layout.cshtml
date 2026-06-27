@@ -53,6 +53,7 @@
                             <a class="nav-link nav-link-premium" asp-area="" asp-page="/Utilizadores/Index">
                                 <i class="bi bi-people"></i> Vendedores
                             </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link nav-link-premium" asp-area="" asp-page="/Favoritos/Index">
                                 <i class="bi bi-heart"></i> Favoritos
@@ -61,6 +62,11 @@
                         <li class="nav-item">
                             <a class="nav-link nav-link-premium" asp-area="" asp-page="/Mensagens/Index">
                                 <i class="bi bi-chat-left-dots"></i> Chat <span class="badge bg-danger" id="contador-rodape">@ViewData["ContadorNaoLidas"]</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-premium text-primary fw-bold" asp-area="" asp-page="/Autoria">
+                                <i class="bi bi-mortarboard"></i> Autoria
                             </a>
                         </li>
                     </ul>
@@ -112,7 +118,8 @@
                 <div class="col-lg-4 col-md-6">
                     <h6 class="mb-3 text-uppercase font-weight-bold" style="font-size: 0.85rem; letter-spacing: 0.05em;">Suporte e Privacidade</h6>
                     <p class="text-muted small">Projeto desenvolvido no âmbito da cadeira de Desenvolvimento Web do IPT 2025/2026.</p>
-                    <a class="footer-link" asp-area="" asp-page="/Privacy">Política de Privacidade</a>
+                    <a class="footer-link" asp-area="" asp-page="/Privacy">Política de Privacidade</a> | 
+                    <a class="footer-link fw-bold text-primary" asp-area="" asp-page="/Autoria">Identificação e Autoria</a>
                 </div>
             </div>
             

@@ -1,0 +1,195 @@
+@page
+@model Proj_finalweb_loja.Pages.AutoriaModel
+@{
+    ViewData["Title"] = "Identificação e Autoria";
+}
+
+<div class="container py-5">
+    <!-- Header Hero Section -->
+    <div class="row mb-5 text-center">
+        <div class="col-lg-8 mx-auto">
+            <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2 mb-3 text-uppercase fw-bold tracking-wider" style="letter-spacing: 1px;">Projeto Académico</span>
+            <h1 class="display-4 fw-extrabold mb-3 text-gradient">Identificação & Autoria</h1>
+            <p class="lead text-muted">Desenvolvido no âmbito da disciplina de <strong>Desenvolvimento Web</strong> no Instituto Politécnico de Tomar.</p>
+            <div class="mx-auto my-3" style="width: 80px; height: 4px; background: linear-gradient(90deg, #6366f1, #a855f7); border-radius: 2px;"></div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="row g-4 mb-5">
+        <!-- Institution & Course Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden card-hover">
+                <div class="card-body p-4 d-flex flex-column align-items-center text-center">
+                    <div class="icon-shape bg-primary-subtle text-primary rounded-circle mb-4 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; font-size: 1.8rem;">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <h3 class="card-title fw-bold h5 mb-2">Instituição & Curso</h3>
+                    <p class="card-text text-muted mb-0">Instituto Politécnico de Tomar (IPT)</p>
+                    <p class="card-text text-muted mb-3">Escola Superior de Tecnologia de Tomar</p>
+                    <div class="mt-auto py-2 bg-light w-100 rounded-3">
+                        <span class="fw-semibold text-dark">Engenharia Informática</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Authors Card -->
+        <div class="col-md-6 col-lg-8">
+            <div class="card h-100 border-0 shadow-sm rounded-4 card-hover">
+                <div class="card-body p-4">
+                    <h3 class="card-title fw-bold h5 mb-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-people-fill text-primary"></i> Equipa de Desenvolvimento
+                    </h3>
+                    <div class="row g-3">
+                        <!-- Author 1 -->
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light-subtle">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                    A1
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Eduardo Vidal</h6>
+                                    <p class="text-muted small mb-0">Nº de Estudante: 27453</p>
+                                    <span class="badge bg-secondary-subtle text-secondary small">Desenvolvedor Web</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Author 2 -->
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light-subtle">
+                                <div class="avatar bg-purple text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 50px; height: 50px; font-size: 1.2rem; background-color: #a855f7;">
+                                    A2
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Rogério Marques</h6>
+                                    <p class="text-muted small mb-0">Nº de Estudante: 27216</p>
+                                    <span class="badge bg-secondary-subtle text-secondary small">Desenvolvedor Web </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries & Technologies Section -->
+    <div class="card border-0 shadow-sm rounded-4 mb-5 card-hover">
+        <div class="card-body p-4">
+            <h3 class="card-title fw-bold h5 mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-code-slash text-primary"></i> Tecnologias & Bibliotecas Utilizadas
+            </h3>
+            <p class="text-muted mb-4">O projeto BazarIPT foi construído utilizando as tecnologias mais robustas e modernas do ecossistema .NET e frontend:</p>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0 rounded-start">Tecnologia/Biblioteca</th>
+                            <th class="border-0">Finalidade e Função no Projeto</th>
+                            <th class="border-0 rounded-end text-end">Website Oficial</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-purple p-2" style="background-color: #512bd4;"><i class="bi bi-braces"></i></span>
+                                    <span class="fw-bold">ASP.NET Core Razor Pages</span>
+                                </div>
+                            </td>
+                            <td>Estruturação e lógica das páginas web dinâmicas e roteamento.</td>
+                            <td class="text-end"><a href="https://learn.microsoft.com/aspnet/core" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ver Doc</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary p-2"><i class="bi bi-database"></i></span>
+                                    <span class="fw-bold">Entity Framework Core</span>
+                                </div>
+                            </td>
+                            <td>ORM para mapeamento de dados relacional e comunicação com SQL Server.</td>
+                            <td class="text-end"><a href="https://learn.microsoft.com/ef/core" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ver Doc</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-success p-2"><i class="bi bi-shield-lock"></i></span>
+                                    <span class="fw-bold">ASP.NET Core Identity</span>
+                                </div>
+                            </td>
+                            <td>Gestão de autenticação, autorização, registo e login de utilizadores com roles.</td>
+                            <td class="text-end"><a href="https://learn.microsoft.com/aspnet/core/security/authentication/identity" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ver Doc</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-warning p-2 text-dark"><i class="bi bi-lightning-charge"></i></span>
+                                    <span class="fw-bold">ASP.NET Core SignalR</span>
+                                </div>
+                            </td>
+                            <td>Funcionalidades em tempo real para o chat de mensagens instantâneas e notificações.</td>
+                            <td class="text-end"><a href="https://learn.microsoft.com/aspnet/core/signalr" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ver Doc</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-info p-2 text-dark" style="background-color: #563d7c !important; color: white !important;"><i class="bi bi-bootstrap"></i></span>
+                                    <span class="fw-bold">Bootstrap & Icons</span>
+                                </div>
+                            </td>
+                            <td>Framework de estilos e grelha responsiva para o design da interface do utilizador.</td>
+                            <td class="text-end"><a href="https://getbootstrap.com" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">Ver Doc</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- References & Bibliography -->
+    <div class="card border-0 shadow-sm rounded-4 card-hover">
+        <div class="card-body p-4">
+            <h3 class="card-title fw-bold h5 mb-4 d-flex align-items-center gap-2">
+                <i class="bi bi-journal-bookmark-fill text-primary"></i> Referências & Recursos
+            </h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-3 h-100">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-book text-muted me-2"></i>Documentação Técnica</h6>
+                        <p class="text-muted small">Microsoft Learn para o desenvolvimento web robusto com .NET 8/9, EF Core Migrations e SignalR Hubs.</p>
+                        <a href="https://learn.microsoft.com" target="_blank" class="btn btn-sm btn-link p-0 text-decoration-none">Aceder à Plataforma &rarr;</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-3 h-100">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-globe text-muted me-2"></i>Comunidade e Suporte</h6>
+                        <p class="text-muted small">Stack Overflow, fóruns da comunidade .NET e tutoriais diversos do ecossistema do Instituto Politécnico de Tomar.</p>
+                        <a href="https://stackoverflow.com" target="_blank" class="btn btn-sm btn-link p-0 text-decoration-none">Aceder à Comunidade &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(90deg, #6366f1, #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .card-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+    .icon-shape {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

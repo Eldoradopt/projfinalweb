@@ -16,6 +16,12 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR(); // Adicionado para suportar funcionalidades em tempo real (Chat)
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
 
 var app = builder.Build();
 
@@ -34,6 +40,7 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+app.MapControllers(); // Adicionado para rotear endpoints API
 
 // Mapeamento do endpoint do SignalR (Substitui o ChatHub pelo nome correto da tua classe Hub se for diferente)
 app.MapHub<ChatHub>("/chatHub"); 
