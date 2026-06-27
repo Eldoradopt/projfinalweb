@@ -55,17 +55,7 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
             if (user == null)
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            Input = new InputModel
-            {
-                Nome = user.Nome,
-                PhoneNumber = user.PhoneNumber,
-                Cidade = user.Cidade,
-                Morada = user.Morada
-            };
-
-            FotoAtual = user.FotoPerfilPath;
-
-            return Page();
+            return RedirectToPage("/Utilizadores/Perfil", new { id = user.Id, tab = "editar" });
         }
 
         public async Task<IActionResult> OnPostAsync()

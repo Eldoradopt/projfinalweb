@@ -1,0 +1,97 @@
+@page
+@model Proj_finalweb_loja.Pages.Anuncios.DeleteModel
+@{
+    ViewData["Title"] = "Eliminar Anúncio";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <!-- Breadcrumb navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Anuncios/Index" class="text-decoration-none text-muted">Artigos</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="text-decoration-none text-muted text-truncate" style="max-width: 150px;">@Model.Anuncio.Titulo</a></li>
+                <li class="breadcrumb-item active fw-bold text-danger" aria-current="page">Eliminar</li>
+            </ol>
+        </nav>
+
+        <!-- Card Danger Container -->
+        <div class="bg-white border border-light p-4 p-md-5 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-danger rounded-circle p-3 text-white d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);">
+                    <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+                </div>
+                <div>
+                    <h1 class="fw-extrabold h3 mb-1 text-danger">Eliminar Anúncio?</h1>
+                    <p class="text-muted small mb-0">Tens a certeza que pretendes remover este artigo do Bazar? Esta ação é irreversível.</p>
+                </div>
+            </div>
+
+            <!-- Warning Callout -->
+            <div class="alert alert-danger border-0 d-flex gap-3 mb-4 align-items-center" style="border-radius: var(--radius-md); background-color: rgba(220, 53, 69, 0.08); color: #842029;">
+                <i class="bi bi-shield-slash-fill fs-3 text-danger"></i>
+                <div class="small">
+                    <strong>Aviso de Segurança:</strong> Ao prosseguir, todas as imagens do artigo, estatísticas de visualizações e mensagens de chat correspondentes serão eliminadas definitivamente da base de dados.
+                </div>
+            </div>
+
+            <!-- Ad Preview Card -->
+            <div class="card border border-light bg-light p-3 mb-4" style="border-radius: var(--radius-md);">
+                <div class="d-flex align-items-center gap-3">
+                    @{
+                        var principalImg = Model.Anuncio.Imagens.FirstOrDefault(i => i.Principal)?.CaminhoFicheiro 
+                                           ?? "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80";
+                    }
+                    <img src="@principalImg" alt="Miniatura do Artigo" class="img-thumbnail border-0 shadow-sm" style="width: 90px; height: 90px; object-fit: cover; border-radius: var(--radius-sm);" />
+                    
+                    <div class="flex-grow-1 min-width-0">
+                        <span class="badge bg-secondary mb-1" style="font-size: 0.72rem; font-weight: 600;">@Model.Anuncio.Categoria?.Nome</span>
+                        <h5 class="fw-bold mb-1 text-dark text-truncate">@Model.Anuncio.Titulo</h5>
+                        <div class="h4 fw-extrabold mb-0 text-primary">@Model.Anuncio.Preco.ToString("0.00") €</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Form -->
+            <form method="post" id="deleteForm">
+                <input type="hidden" asp-for="Anuncio.Id" />
+                
+                <!-- Security Consent Checkbox -->
+                <div class="form-check p-3 border border-danger-subtle d-flex align-items-center mb-4" 
+                     style="border-radius: var(--radius-md); background-color: rgba(220, 53, 69, 0.03); padding-left: 2.75rem;">
+                    <input class="form-check-input ms-0 me-3" type="checkbox" id="confirmDeleteCheck" required style="cursor: pointer; width: 1.3rem; height: 1.3rem; margin-top: 0;" />
+                    <label class="form-check-label small fw-bold text-danger-dark" for="confirmDeleteCheck" style="cursor: pointer; user-select: none; color: #842029;">
+                        Compreendo que esta ação é permanente e que não poderei recuperar este anúncio.
+                    </label>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
+                    <a asp-page="/Anuncios/Details" asp-route-id="@Model.Anuncio.Id" class="btn btn-premium-outline order-2 order-sm-1">
+                        <i class="bi bi-x-circle"></i> Cancelar e Voltar
+                    </a>
+                    
+                    <button type="submit" id="btnDeleteSubmit" class="btn btn-danger order-1 order-sm-2 py-2 px-4 fw-bold text-white d-inline-flex align-items-center justify-content-center gap-2" disabled style="border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: none; min-width: 220px; transition: all 0.2s ease;">
+                        <i class="bi bi-trash-fill"></i> Sim, Eliminar Anúncio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const confirmCheck = document.getElementById('confirmDeleteCheck');
+            const deleteBtn = document.getElementById('btnDeleteSubmit');
+
+            confirmCheck.addEventListener('change', function() {
+                deleteBtn.disabled = !this.checked;
+            });
+
+            // Initial verification state on load
+            deleteBtn.disabled = !confirmCheck.checked;
+        });
+    </script>
+}

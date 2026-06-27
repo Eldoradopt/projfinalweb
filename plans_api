@@ -1,0 +1,26 @@
+ficheiro de texto para api 
+
+- Mensagem: Registo de mensagens enviadas entre comprador e vendedor sobre um artigo. *********
+- Avaliacao: Sistema de classificação pós-venda (1 a 5 estrelas).*********
+- Favorito: Tabela N-M de ligação para favoritos utilizando chaves compostas. *********
+
+
+Planos de Api
+- O usuario deve conseguir criar, atualizar, apagar anuncios 
+- O usuario deve conseguir criar, atualizar, apagar mensagens 
+- O usuario deve conseguir criar, atualizar, apagar avaliacoes
+- O usuario deve conseguir criar, atualizar, apagar favoritos
+- O usuario deve conseguir criar, atualizar, apagar categorias
+- O usuario deve conseguir criar, atualizar, apagar subcategorias
+- O usuario deve conseguir criar, atualizar, apagar imagens
+
+
+em consideracao os planos atuais do projeto
+whislists: devem ser guardadas as categorias que o usuario quer ver, e quando ele entrar na pagina de anuncios, mostrar os anuncios dessa categoria.
+
+compras: o usuario deve conseguir ver o historico das suas compras, e o vendedor deve conseguir ver o historico das suas vendas
+
+mensagens: o usuario deve conseguir ver o historico das suas mensagens, e o vendedor deve conseguir ver o historico das suas mensagens
+
+ratings: o usuario deve conseguir ver o historico das suas avaliacoes, e o vendedor deve conseguir ver o historico das suas avaliacoes
+

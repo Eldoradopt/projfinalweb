@@ -40,11 +40,6 @@
                     
                     <ul class="navbar-nav me-3 align-items-lg-center">
                         <li class="nav-item">
-                            <a class="nav-link nav-link-premium" asp-area="" asp-page="/Index">
-                                <i class="bi bi-house"></i> Início
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link nav-link-premium" asp-area="" asp-page="/Anuncios/Index">
                                 <i class="bi bi-grid"></i> Artigos
                             </a>
@@ -57,16 +52,6 @@
                         <li class="nav-item">
                             <a class="nav-link nav-link-premium" asp-area="" asp-page="/Utilizadores/Index">
                                 <i class="bi bi-people"></i> Vendedores
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-premium" asp-area="" asp-page="/Favoritos/Index">
-                                <i class="bi bi-heart"></i> Favoritos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-premium" asp-area="" asp-page="/Mensagens/Index">
-                                <i class="bi bi-chat-left-dots"></i> Chat
                             </a>
                         </li>
                     </ul>
@@ -133,10 +118,84 @@
         </div>
     </footer>
 
+    <!-- Floating Chat Bubble Widget -->
+    <div class="chat-bubble-container d-print-none">
+        <!-- Chat Window -->
+        <div id="chatWindow" class="chat-window d-none">
+            <div class="chat-window-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-chat-left-text-fill"></i>
+                    <span class="fw-bold">Chat BazarIPT</span>
+                </div>
+                <button id="closeChatBtn" class="btn-close-chat" type="button" title="Fechar Chat">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="chat-window-body">
+                <iframe id="chatIframe" src="about:blank" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+
+        <!-- Chat Bubble Button -->
+        <button id="chatBubbleBtn" class="chat-bubble-toggle" type="button" title="Abrir Mensagens">
+            <i class="bi bi-chat-dots-fill"></i>
+            <span id="chatBubbleBadge" class="chat-badge d-none">0</span>
+        </button>
+    </div>
+
     <!-- Standard Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Floating Chat Widget Script -->
+    <script>
+        $(document).ready(function() {
+            const $chatBubbleBtn = $('#chatBubbleBtn');
+            const $chatWindow = $('#chatWindow');
+            const $closeChatBtn = $('#closeChatBtn');
+            const $chatIframe = $('#chatIframe');
+            const $chatBubbleBadge = $('#chatBubbleBadge');
+
+            // 1. Polling for unread messages count
+            function checkUnreadCount() {
+                $.getJSON('/Mensagens/Index?handler=UnreadCount', function(data) {
+                    if (data && data.count > 0) {
+                        $chatBubbleBadge.text(data.count).removeClass('d-none');
+                    } else {
+                        $chatBubbleBadge.addClass('d-none');
+                    }
+                }).fail(function() {
+                    console.log('Erro ao obter contagem de mensagens não lidas.');
+                });
+            }
+
+            // Poll every 10 seconds
+            checkUnreadCount();
+            setInterval(checkUnreadCount, 10000);
+
+            // 2. Toggle Chat Window
+            $chatBubbleBtn.on('click', function() {
+                if ($chatWindow.hasClass('d-none')) {
+                    // Open Chat
+                    $chatWindow.removeClass('d-none');
+                    
+                    // Lazy load iframe content if not loaded yet
+                    if ($chatIframe.attr('src') === 'about:blank') {
+                        $chatIframe.attr('src', '/Mensagens/Index?isWidget=true');
+                    }
+                } else {
+                    // Close Chat
+                    $chatWindow.addClass('d-none');
+                }
+            });
+
+            // 3. Close Chat Button
+            $closeChatBtn.on('click', function() {
+                $chatWindow.addClass('d-none');
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

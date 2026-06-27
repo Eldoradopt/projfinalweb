@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,17 @@ namespace Proj_finalweb_loja.Pages.Anuncios
     {
         private readonly ApplicationDbContext _context;
 
-        public IndexModel(ApplicationDbContext context)
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public IndexModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public IList<Anuncio> Anuncios { get; set; } = new List<Anuncio>();
         public IList<Categoria> Categorias { get; set; } = new List<Categoria>();
+        public List<int> FavoritedAdIds { get; set; } = new List<int>();
 
         [BindProperty(SupportsGet = true)]
         public string? SearchString { get; set; }
@@ -38,6 +43,27 @@ namespace Proj_finalweb_loja.Pages.Anuncios
 
         public async Task OnGetAsync()
         {
+            // Load Favorited Ad IDs for logged in or demo user
+            string? userId = null;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                userId = user?.Id;
+            }
+            else
+            {
+                var demo = await _userManager.FindByEmailAsync("joao@ipt.pt");
+                userId = demo?.Id;
+            }
+
+            if (userId != null)
+            {
+                FavoritedAdIds = await _context.Favoritos
+                    .Where(f => f.UtilizadorFK == userId)
+                    .Select(f => f.AnuncioFK)
+                    .ToListAsync();
+            }
+
             // Load Categories for filters
             Categorias = await _context.Categorias
                 .Where(c => c.CategoriaPaiFK == null)

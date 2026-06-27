@@ -1,0 +1,124 @@
+@page
+@model Proj_finalweb_loja.Pages.Categorias.IndexModel
+@{
+    ViewData["Title"] = "Gestão de Categorias";
+}
+
+<div class="container py-4">
+    <!-- Header Admin Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+                    <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Painel de Controlo</li>
+                </ol>
+            </nav>
+            <h1 class="fw-extrabold h2 mb-1">Gestão de Categorias</h1>
+            <p class="text-muted small mb-0">Adiciona, edita ou remove as categorias e subcategorias de artigos disponíveis no BazarIPT.</p>
+        </div>
+        
+        <a asp-page="./Create" class="btn btn-premium">
+            <i class="bi bi-plus-circle"></i> Nova Categoria
+        </a>
+    </div>
+
+    <!-- Alert Notifications -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-3 mb-4" role="alert" style="border-radius: var(--radius-md);">
+            <i class="bi bi-check-circle-fill fs-4 text-success"></i>
+            <div>@TempData["SuccessMessage"]</div>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center gap-3 mb-4" role="alert" style="border-radius: var(--radius-md);">
+            <i class="bi bi-exclamation-octagon-fill fs-4 text-danger"></i>
+            <div>@TempData["ErrorMessage"]</div>
+        </div>
+    }
+
+    <!-- Table Card -->
+    <div class="bg-white border border-light shadow-sm" style="border-radius: var(--radius-lg); overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase tracking-wider small fw-bold text-muted" style="width: 80px;">Ícone</th>
+                        <th class="py-3 text-uppercase tracking-wider small fw-bold text-muted">Categoria</th>
+                        <th class="py-3 text-uppercase tracking-wider small fw-bold text-muted">Tipo / Categoria Pai</th>
+                        <th class="py-3 text-uppercase tracking-wider small fw-bold text-muted text-center" style="width: 150px;">Subcategorias</th>
+                        <th class="py-3 text-uppercase tracking-wider small fw-bold text-muted text-end pe-4" style="width: 200px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Categorias.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-folder-x fs-1 d-block mb-2 text-muted" style="opacity: 0.5;"></i>
+                                Nenhuma categoria encontrada. Começa por criar uma!
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.Categorias)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-@(string.IsNullOrEmpty(item.Icone) ? "folder" : item.Icone) fs-5"></i>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@item.Nome</div>
+                                    <span class="text-muted small">ID: #@item.Id</span>
+                                </td>
+                                <td>
+                                    @if (item.CategoriaPaiFK == null)
+                                    {
+                                        <span class="badge bg-primary-light text-primary px-2.5 py-1.5 fw-semibold" style="background-color: var(--clr-primary-light); color: var(--clr-primary) !important; border-radius: var(--radius-sm);">Categoria Principal</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small d-inline-flex align-items-center gap-1">
+                                            <i class="bi bi-arrow-return-right"></i>
+                                            @item.CategoriaPai?.Nome
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.CategoriaPaiFK == null)
+                                    {
+                                        <span class="badge bg-light text-dark fw-bold border border-light" style="border-radius: var(--radius-sm);">
+                                            @item.Subcategorias.Count sub
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex gap-2">
+                                        <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-premium-outline py-1 px-2.5" title="Editar">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" onsubmit="return confirm('Tens a certeza que queres eliminar a categoria &quot;@item.Nome&quot;?');" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2.5 d-inline-flex align-items-center gap-1" style="border-radius: var(--radius-md);">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

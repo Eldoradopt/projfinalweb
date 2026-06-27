@@ -115,9 +115,11 @@
                                     @estadoName
                                 </span>
                                 
-                                <button class="btn-favorite-badge shadow-sm" type="button" title="Adicionar aos favoritos">
-                                    <i class="bi bi-heart"></i>
-                                </button>
+                                <form method="post" asp-page="/Favoritos/Index" asp-page-handler="Toggle" asp-route-anuncioId="@ad.Id" asp-route-returnUrl="@(Request.Path + Request.QueryString)" class="d-inline">
+                                    <button class="btn-favorite-badge shadow-sm" type="submit" title="Adicionar/Remover dos favoritos">
+                                        <i class="bi @(Model.FavoritedAdIds.Contains(ad.Id) ? "bi-heart-fill text-danger" : "bi-heart")"></i>
+                                    </button>
+                                </form>
                                 
                                 <img src="@principalImg.CaminhoFicheiro" alt="@ad.Titulo" class="card-img-premium" />
                             </div>
@@ -137,6 +139,14 @@
                                         </div>
                                     }
                                 </div>
+                                @if (ad.Vendedor?.Suspeito == true)
+                                {
+                                    <div class="mb-2">
+                                        <span class="badge bg-danger-light text-danger fs-8 d-inline-flex align-items-center gap-1" style="background-color: rgba(220, 53, 69, 0.1); font-size: 0.7rem; font-weight: 600; padding: 4px 8px; border-radius: 4px;">
+                                            <i class="bi bi-exclamation-triangle"></i> Vendedor Suspeito
+                                        </span>
+                                    </div>
+                                }
                                 <h5 class="card-title-premium">
                                     <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id" class="text-decoration-none text-dark hover-primary">
                                         @ad.Titulo

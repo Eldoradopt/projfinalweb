@@ -1,0 +1,100 @@
+@page
+@model Proj_finalweb_loja.Pages.Categorias.EditModel
+@{
+    ViewData["Title"] = "Editar Categoria";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-lg-6">
+        <!-- Breadcrumb navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none text-muted">Início</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Gestão de Categorias</a></li>
+                <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Editar Categoria</li>
+            </ol>
+        </nav>
+
+        <!-- Card Container -->
+        <div class="bg-white border border-light p-4 p-md-5 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-primary-light rounded-circle p-3 text-primary d-flex align-items-center justify-content-center" style="background-color: var(--clr-primary-light); width: 60px; height: 60px;">
+                    <i class="bi bi-folder-symlink fs-2" style="color: var(--clr-primary);"></i>
+                </div>
+                <div>
+                    <h1 class="fw-extrabold h3 mb-1">Editar Categoria</h1>
+                    <p class="text-muted small mb-0">Modifica o nome, ícone ou hierarquia da categoria <strong>@Model.Categoria.Nome</strong>.</p>
+                </div>
+            </div>
+
+            <form method="post" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+                <input type="hidden" asp-for="Input.Id" />
+
+                <!-- 1. Nome da Categoria -->
+                <div class="mb-4">
+                    <label asp-for="Input.Nome" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                    <input asp-for="Input.Nome" class="form-control py-2" placeholder="Ex: Telemóveis, Livros, Acessórios..." style="border-radius: var(--radius-md);" />
+                    <span asp-validation-for="Input.Nome" class="text-danger small"></span>
+                </div>
+
+                <!-- 2. Ícone Bootstrap -->
+                <div class="mb-4">
+                    <label asp-for="Input.Icone" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-tag text-muted"></i></span>
+                        <input asp-for="Input.Icone" class="form-control border-start-0 py-2" placeholder="Ex: laptop, phone, bicycle, bag-heart..." style="border-radius: 0 var(--radius-md) var(--radius-md) 0;" id="iconNameInput" />
+                    </div>
+                    <div class="form-text small text-muted">Insere o nome de um ícone da <a href="https://icons.getbootstrap.com/" target="_blank" class="text-decoration-none fw-semibold">Bootstrap Icons</a>.</div>
+                    <span asp-validation-for="Input.Icone" class="text-danger small"></span>
+
+                    <!-- Icon Preview Area -->
+                    <div class="mt-3 d-flex align-items-center gap-2 bg-light p-2 rounded" id="iconPreviewContainer" style="border-radius: var(--radius-sm);">
+                        <span class="small text-muted">Ícone Atual/Novo:</span>
+                        <div class="bg-white rounded-circle p-1.5 d-flex align-items-center justify-content-center text-primary shadow-sm" style="width: 32px; height: 32px;">
+                            <i id="iconPreview" class="bi bi-@(string.IsNullOrEmpty(Model.Input.Icone) ? "folder" : Model.Input.Icone) fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Categoria Pai (Dropdown) -->
+                <div class="mb-4">
+                    <label asp-for="Input.CategoriaPaiFK" class="form-label fw-bold small text-uppercase tracking-wider text-muted"></label>
+                    <select asp-for="Input.CategoriaPaiFK" asp-items="Model.ParentCategoriesList" class="form-select py-2" style="border-radius: var(--radius-md);">
+                        <option value="">(Nenhuma - Definir como Categoria Principal)</option>
+                    </select>
+                    <span asp-validation-for="Input.CategoriaPaiFK" class="text-danger small"></span>
+                </div>
+
+                <!-- Submit and Cancel Buttons -->
+                <div class="d-flex flex-column flex-sm-row justify-content-end gap-3 mt-4">
+                    <a asp-page="./Index" class="btn btn-premium-outline order-2 order-sm-1">
+                        <i class="bi-x-circle"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-premium order-1 order-sm-2">
+                        <i class="bi-check-circle"></i> Guardar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const iconInput = document.getElementById('iconNameInput');
+        const previewContainer = document.getElementById('iconPreviewContainer');
+        const previewIcon = document.getElementById('iconPreview');
+
+        iconInput.addEventListener('input', function() {
+            const iconName = this.value.trim();
+            if (iconName) {
+                previewIcon.className = `bi bi-${iconName} fs-5`;
+            } else {
+                previewIcon.className = 'bi bi-folder fs-5';
+            }
+        });
+    </script>
+}

@@ -5,17 +5,65 @@
 <ul class="navbar-nav align-items-lg-center">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a class="nav-link nav-link-premium" asp-area="Identity" asp-page="/Account/Manage/Index" title="Gerir Conta">
-            <i class="bi bi-person-circle fs-5"></i> Olá @User.Identity?.Name!
+    @if (User.IsInRole("Admin"))
+    {
+        <li class="nav-item me-2">
+            <a class="nav-link nav-link-premium text-danger fw-bold" asp-page="/Admin/Moderacao" title="Painel de Moderação">
+                <i class="bi bi-shield-lock-fill"></i> Moderação
+            </a>
+        </li>
+    }
+    <li class="nav-item dropdown ms-lg-2">
+        <a class="profile-dropdown-btn dropdown-toggle text-decoration-none" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            @{
+                var currentUser = await UserManager.GetUserAsync(User);
+                var avatarPath = currentUser?.FotoPerfilPath;
+                var userName = currentUser?.Nome ?? User.Identity?.Name ?? "Utilizador";
+                var firstLetter = !string.IsNullOrWhiteSpace(userName) ? userName.Substring(0, 1).ToUpper() : "U";
+            }
+            @if (!string.IsNullOrWhiteSpace(avatarPath))
+            {
+                <img src="@avatarPath" alt="@userName" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;" />
+            }
+            else
+            {
+                <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center" 
+                     style="width: 28px; height: 28px; font-size: 0.8rem; background: linear-gradient(135deg, var(--clr-primary), var(--clr-secondary));">
+                    @firstLetter
+                </div>
+            }
+            <span class="d-none d-lg-inline fw-semibold text-dark small">@userName</span>
         </a>
-    </li>
-    <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-            <button type="submit" class="nav-link nav-link-premium border-0 bg-transparent">
-                <i class="bi bi-box-arrow-right"></i> Sair
-            </button>
-        </form>
+        <ul class="dropdown-menu dropdown-menu-end profile-dropdown-menu mt-2 border-light shadow-lg" aria-labelledby="profileDropdown">
+            <li>
+                <a class="dropdown-item profile-dropdown-item" asp-page="/Utilizadores/Perfil" asp-route-id="@currentUser?.Id">
+                    <i class="bi bi-person-badge text-primary"></i> O meu Perfil
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item profile-dropdown-item" asp-page="/Utilizadores/Perfil" asp-route-id="@currentUser?.Id" asp-route-tab="anuncios">
+                    <i class="bi bi-grid-3x3-gap text-success"></i> Os meus Anúncios
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item profile-dropdown-item" asp-page="/Utilizadores/Perfil" asp-route-id="@currentUser?.Id" asp-route-tab="editar">
+                    <i class="bi bi-pencil-square text-info"></i> Editar Perfil
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item profile-dropdown-item" asp-page="/Favoritos/Index">
+                    <i class="bi bi-heart text-danger"></i> Artigos Favoritos
+                </a>
+            </li>
+            <li><hr class="dropdown-divider border-light"></li>
+            <li>
+                <form class="w-100" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post">
+                    <button type="submit" class="dropdown-item profile-dropdown-item w-100 border-0 bg-transparent text-start">
+                        <i class="bi bi-box-arrow-right text-muted"></i> Sair da Conta
+                    </button>
+                </form>
+            </li>
+        </ul>
     </li>
 }
 else
