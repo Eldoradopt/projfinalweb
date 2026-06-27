@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Proj_finalweb_loja.Data;
 using Proj_finalweb_loja.Data.Model;
@@ -16,11 +17,13 @@ namespace Proj_finalweb_loja.Pages.Mensagens
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public ChatModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public ChatModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IHubContext<ChatHub> hubContext)
         {
             _context = context;
             _userManager = userManager;
+            _hubContext = hubContext;
         }
 
         public IList<Mensagem> Mensagens { get; set; } = new List<Mensagem>();
@@ -170,6 +173,9 @@ namespace Proj_finalweb_loja.Pages.Mensagens
 
             _context.Mensagens.Add(novaMensagem);
             await _context.SaveChangesAsync();
+
+            // Broadcast message via SignalR
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", currentUserId, RecipientId, AnuncioId, novaMensagem.Conteudo);
 
             var isWidget = Request.Query["isWidget"] == "true";
             return RedirectToPage("./Chat", new { anuncioId = AnuncioId, destinatarioId = RecipientId, isWidget = isWidget ? "true" : null });

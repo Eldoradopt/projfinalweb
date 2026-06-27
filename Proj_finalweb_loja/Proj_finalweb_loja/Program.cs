@@ -24,6 +24,8 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthentication(); // Adicionado: Essencial para o Identity processar o utilizador antes da Autorização

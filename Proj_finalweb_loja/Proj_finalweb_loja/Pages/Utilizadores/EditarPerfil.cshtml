@@ -97,7 +97,7 @@
                             </div>
 
                             <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                <a asp-page="/Utilizadores/Perfil" asp-route-id="@User.Identity.Name" class="btn btn-secondary border-0" style="background: var(--clr-bg-alt); color: var(--clr-text-muted);">
+                                <a asp-page="/Utilizadores/Perfil" asp-route-id="@User.Identity?.Name" class="btn btn-secondary border-0" style="background: var(--clr-bg-alt); color: var(--clr-text-muted);">
                                     <i class="bi bi-x"></i> Cancelar
                                 </a>
                                 <button type="submit" class="btn btn-premium">

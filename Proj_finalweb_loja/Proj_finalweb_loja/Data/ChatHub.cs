@@ -5,7 +5,6 @@ using Proj_finalweb_loja.Data.Model;
 
 namespace Proj_finalweb_loja.Data
 {
-    [Authorize]
     public class ChatHub : Hub
     {
         private readonly ApplicationDbContext _context;

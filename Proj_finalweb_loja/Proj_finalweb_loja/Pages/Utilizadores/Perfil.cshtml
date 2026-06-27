@@ -88,7 +88,7 @@
                         <i class="bi bi-pencil-square"></i> Editar Perfil
                     </button>
                 }
-                else if (User.Identity.IsAuthenticated)
+                else if (User.Identity?.IsAuthenticated == true)
                 {
                     <form method="post" asp-page-handler="ToggleFavorito" asp-route-id="@Model.Vendedor.Id">
                         <button type="submit" class="btn btn-sm @(Model.IsFavorito ? "btn-danger" : "btn-outline-danger")">
