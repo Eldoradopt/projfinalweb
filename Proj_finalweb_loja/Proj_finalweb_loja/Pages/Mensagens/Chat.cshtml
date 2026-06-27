@@ -155,18 +155,76 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // Automatic Chat Scroll down to bottom
+        // Scroll to bottom on load
         window.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('chatMessagesContainer');
-            if (container) {
-                container.scrollTop = container.scrollHeight;
-            }
-            
-            // Focus on message input automatically
+            if (container) container.scrollTop = container.scrollHeight;
+
             const input = document.getElementById('chatMessageInput');
-            if (input) {
-                input.focus();
-            }
+            if (input) input.focus();
         });
+
+        // SignalR: receive real-time messages
+        const recipientId = '@Model.RecipientId';
+        const currentUserId = '@Model.CurrentUser.Id';
+        const anuncioId    = '@Model.AnuncioId';
+
+        function buildBubble(content, isOutgoing, timestamp) {
+            const alignClass  = isOutgoing ? 'align-items-end' : 'align-items-start';
+            const bgStyle     = isOutgoing
+                ? 'background:linear-gradient(135deg,var(--clr-primary),var(--clr-secondary));color:#fff;border:none;'
+                : 'background:#fff;color:var(--clr-text-main);border:1px solid var(--clr-border);';
+            const borderRadius = isOutgoing ? '18px 18px 0 18px' : '18px 18px 18px 0';
+            return `
+                <div class="d-flex flex-column ${alignClass}">
+                    <div class="p-3 shadow-sm" style="max-width:75%;border-radius:${borderRadius};${bgStyle}">
+                        <p class="mb-0 text-break small">${content}</p>
+                    </div>
+                    <div class="mt-1 d-flex align-items-center gap-1 text-muted" style="font-size:0.7rem;">
+                        <span>${timestamp}</span>
+                        ${isOutgoing ? '<i class="bi bi-check text-muted"></i>' : ''}
+                    </div>
+                </div>`;
+        }
+
+        if (typeof globalConnection !== 'undefined') {
+            // Re-use the global hub connection from _Layout
+            globalConnection.on("ReceiveMessage", function(senderId, receiverId, adId, content) {
+                const isRelevant =
+                    (senderId === recipientId || senderId === currentUserId) &&
+                    (receiverId === recipientId || receiverId === currentUserId) &&
+                    String(adId) === String(anuncioId);
+
+                if (!isRelevant) return;
+
+                const isOutgoing = senderId === currentUserId;
+                const now = new Date();
+                const ts  = now.toLocaleDateString('pt-PT', {day:'2-digit',month:'2-digit'})
+                          + ' ' + now.toLocaleTimeString('pt-PT', {hour:'2-digit',minute:'2-digit'});
+
+                const container = document.getElementById('chatMessagesContainer');
+                if (container) {
+                    // Remove empty-state message if present
+                    const empty = container.querySelector('.text-center.my-auto');
+                    if (empty) empty.remove();
+
+                    container.insertAdjacentHTML('beforeend', buildBubble(content, isOutgoing, ts));
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
+        }
+
+        // Intercept form submit to send via SignalR and clear input (keeps POST for persistence)
+        const chatForm = document.getElementById('chatForm');
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(e) {
+                const input = document.getElementById('chatMessageInput');
+                if (!input || !input.value.trim()) return;
+
+                // Let the form POST normally so the message is saved in DB
+                // SignalR hub will broadcast after save via ChatHub
+            });
+        }
     </script>
 }
+

@@ -142,6 +142,10 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
             if (currentUser == null)
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
 
+            // Remove validation errors from EditarInput — it's not part of this rating form
+            foreach (var key in ModelState.Keys.Where(k => k.StartsWith("EditarInput") || k == "FotoPerfil").ToList())
+                ModelState.Remove(key);
+
             if (!ModelState.IsValid)
                 return await ReloadPageAsync(RatingInput.VendedorId);
 
@@ -247,6 +251,10 @@ namespace Proj_finalweb_loja.Pages.Utilizadores
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
+
+            // Remove validation errors from RatingInput — it's not part of this form
+            foreach (var key in ModelState.Keys.Where(k => k.StartsWith("RatingInput")).ToList())
+                ModelState.Remove(key);
 
             if (!ModelState.IsValid)
             {

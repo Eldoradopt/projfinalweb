@@ -57,11 +57,10 @@ namespace Proj_finalweb_loja.Data
             _context.Mensagens.Add(novaMensagem);
             await _context.SaveChangesAsync();
 
-            var nomeExibicao = Context.User?.Identity?.Name ?? "Utilizador";
-            
-            // Envia para TODOS na app verem o balão a aparecer dinamicamente
-            await Clients.All.SendAsync("ReceiveMessage", nomeExibicao, message);
+            // Broadcast full info so the Chat page can filter by conversation
+            await Clients.All.SendAsync("ReceiveMessage", remetenteId, destinatarioId, anuncioId, message);
 
+            // Notify recipient of unread badge
             if (!string.IsNullOrEmpty(destinatarioId))
             {
                 await Clients.User(destinatarioId).SendAsync("ReceiveUnreadNotification");

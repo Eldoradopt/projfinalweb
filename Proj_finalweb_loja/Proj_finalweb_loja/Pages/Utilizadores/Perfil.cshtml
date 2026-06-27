@@ -272,7 +272,7 @@
                         </div>
                     }
 
-                    <form method="post" asp-page-handler="EditarPerfil" enctype="multipart/form-data">
+                    <form method="post" asp-page-handler="EditarPerfil" asp-route-id="@Model.Vendedor.Id" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                         <div class="row g-4">

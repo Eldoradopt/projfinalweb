@@ -143,11 +143,11 @@
                     </button>
                 }
                 
-                <a asp-page="/Chat" 
+                <a asp-page="/Mensagens/Chat" 
                    asp-route-destinatarioId="@Model.Anuncio.VendedorFK" 
                    asp-route-anuncioId="@Model.Anuncio.Id" 
                    class="btn btn-premium-outline w-100 justify-content-center">
-                    <i class="bi bi-chat-left-text"></i> Enviar Mensagem (Tempo Real)
+                    <i class="bi bi-chat-left-text"></i> Enviar Mensagem
                 </a>
                 <form method="post" asp-page-handler="ToggleFavorito" asp-route-anuncioId="@Model.Anuncio.Id" class="w-100">
                     @Html.AntiForgeryToken()
