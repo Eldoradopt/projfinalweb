@@ -121,7 +121,9 @@
                                     </button>
                                 </form>
                                 
-                                <img src="@principalImg.CaminhoFicheiro" alt="@ad.Titulo" class="card-img-premium" />
+                                <a asp-page="/Anuncios/Details" asp-route-id="@ad.Id">
+                                    <img src="@principalImg.CaminhoFicheiro" alt="@ad.Titulo" class="card-img-premium" />
+                                </a>
                             </div>
                             <div class="card-body-premium">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -177,5 +179,6 @@
                 </div>
             }
         </div>
+    </div>
     </div>
 </div>
