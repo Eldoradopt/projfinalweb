@@ -47,7 +47,7 @@ O projeto baseia-se numa arquitetura **Code-First** com as seguintes entidades r
 ### Passos de Execução
 1.  **Clonar o Repositório:**
     ```bash
-    git clone <url-do-teu-repositorio>
+    git clone https://github.com/Eldoradopt/projfinalweb
     cd projfinalweb/Proj_finalweb_loja/Proj_finalweb_loja
     ```
 
