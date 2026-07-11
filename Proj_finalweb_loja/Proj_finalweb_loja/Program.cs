@@ -66,25 +66,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Endpoint para listar todos os anúncios em formato JSON
-app.MapGet("/api/anuncios", async (ApplicationDbContext context) =>
-{
-    var anuncios = await context.Anuncios
-        .Select(a => new { a.Id, a.Titulo, a.Preco, a.Descricao })
-        .ToListAsync();
-        
-    return Results.Ok(anuncios);
-});
 
-// Endpoint para obter os detalhes de um anúncio específico
-app.MapGet("/api/anuncios/{id}", async (int id, ApplicationDbContext context) =>
-{
-    var anuncio = await context.Anuncios
-        .Where(a => a.Id == id)
-        .Select(a => new { a.Id, a.Titulo, a.Preco, a.Descricao })
-        .FirstOrDefaultAsync();
-
-    return anuncio is not null ? Results.Ok(anuncio) : Results.NotFound();
-});
 
 app.Run();

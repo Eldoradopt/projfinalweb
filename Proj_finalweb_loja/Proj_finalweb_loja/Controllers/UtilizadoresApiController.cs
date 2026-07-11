@@ -26,28 +26,35 @@ namespace Proj_finalweb_loja.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UtilizadorDto>> GetUtilizadorDetalhes(string id)
         {
-            var user = await _context.Users
-                .Include(u => u.Anuncios)
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
+            try
             {
-                return NotFound(new { mensagem = "Utilizador não encontrado." });
+                var user = await _context.Users
+                    .Include(u => u.Anuncios)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
+                if (user == null)
+                {
+                    return NotFound(new { mensagem = "Utilizador não encontrado." });
+                }
+
+                var totalAnunciosAtivos = user.Anuncios.Count(a => a.Ativo && a.Estado == EstadoAnuncio.Disponivel);
+
+                var dto = new UtilizadorDto
+                {
+                    Id = user.Id,
+                    Nome = user.Nome,
+                    Cidade = user.Cidade,
+                    FotoPerfilPath = user.FotoPerfilPath,
+                    DataRegisto = user.DataRegisto,
+                    TotalAnunciosAtivos = totalAnunciosAtivos
+                };
+
+                return Ok(dto);
             }
-
-            var totalAnunciosAtivos = user.Anuncios.Count(a => a.Ativo && a.Estado == EstadoAnuncio.Disponivel);
-
-            var dto = new UtilizadorDto
+            catch (System.Exception ex)
             {
-                Id = user.Id,
-                Nome = user.Nome,
-                Cidade = user.Cidade,
-                FotoPerfilPath = user.FotoPerfilPath,
-                DataRegisto = user.DataRegisto,
-                TotalAnunciosAtivos = totalAnunciosAtivos
-            };
-
-            return Ok(dto);
+                return StatusCode(500, new { mensagem = "Ocorreu um erro interno ao processar o pedido.", detalhe = ex.Message });
+            }
         }
     }
 }
