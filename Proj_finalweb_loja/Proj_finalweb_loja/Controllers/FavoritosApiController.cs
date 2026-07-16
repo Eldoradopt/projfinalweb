@@ -35,14 +35,14 @@ namespace Proj_finalweb_loja.Controllers
             var favoritos = await _context.Favoritos
                 .Include(f => f.Anuncio)
                 .Where(f => f.UtilizadorFK == userId)
-                .OrderByDescending(f => f.DataAdicionado)
+                .OrderByDescending(f => f.DataGuardado)
                 .Select(f => new FavoritoDto
                 {
-                    Id = f.Id,
+
                     AnuncioId = f.AnuncioFK,
                     AnuncioTitulo = f.Anuncio != null ? f.Anuncio.Titulo : "Desconhecido",
                     Preco = f.Anuncio != null ? f.Anuncio.Preco : 0,
-                    DataAdicionado = f.DataAdicionado
+                    DataAdicionado = f.DataGuardado
                 })
                 .ToListAsync();
 
@@ -72,7 +72,7 @@ namespace Proj_finalweb_loja.Controllers
             {
                 AnuncioFK = anuncioId,
                 UtilizadorFK = userId,
-                DataAdicionado = DateTime.UtcNow
+                DataGuardado = DateTime.UtcNow
             };
 
             _context.Favoritos.Add(favorito);

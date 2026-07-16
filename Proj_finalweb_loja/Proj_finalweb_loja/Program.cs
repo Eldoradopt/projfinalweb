@@ -22,11 +22,43 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
+    {
+        Title = "Proj_finalweb_loja API",
+        Version = "v1",
+        Description = "API REST da plataforma de marketplace de artigos em segunda mao (Anuncios, Utilizadores, Categorias, Favoritos e Avaliacoes)."
+    });
+
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (System.IO.File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+
+    options.AddSecurityDefinition("cookieAuth", new Microsoft.OpenApi.OpenApiSecurityScheme
+    {
+        Name = "Cookie",
+        Type = Microsoft.OpenApi.SecuritySchemeType.ApiKey,
+        In = Microsoft.OpenApi.ParameterLocation.Cookie,
+        Description = "Autenticacao por cookie do ASP.NET Core Identity. Faz login em /Identity/Account/Login; o cookie e enviado automaticamente pelo browser."
+    });
+});
 
 var app = builder.Build();
 
     app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Proj_finalweb_loja API v1");
+    options.RoutePrefix = "swagger";
+});
 
 app.UseHttpsRedirection();
 
