@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Proj_finalweb_loja.Data.Model
 {
@@ -15,6 +16,7 @@ namespace Proj_finalweb_loja.Data.Model
         public string VendedorNome { get; set; } = string.Empty;
         public string CategoriaNome { get; set; } = string.Empty;
         public string? ImagemPrincipal { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
     }
 
     public class UtilizadorDto

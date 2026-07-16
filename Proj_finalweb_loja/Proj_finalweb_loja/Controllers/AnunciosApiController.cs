@@ -36,6 +36,7 @@ namespace Proj_finalweb_loja.Controllers
                 .Include(a => a.Vendedor)
                 .Include(a => a.Categoria)
                 .Include(a => a.Imagens)
+                .Include(a => a.AnuncioTags).ThenInclude(at => at.Tag)
                 .Select(a => new AnuncioDto
                 {
                     Id = a.Id,
@@ -48,6 +49,7 @@ namespace Proj_finalweb_loja.Controllers
                     VendedorId = a.VendedorFK,
                     VendedorNome = a.Vendedor != null ? a.Vendedor.Nome : "Desconhecido",
                     CategoriaNome = a.Categoria != null ? a.Categoria.Nome : "Sem Categoria",
+                    Tags = a.AnuncioTags.Select(at => at.Tag.Nome).ToList(),
                     ImagemPrincipal = a.Imagens.FirstOrDefault(i => i.Principal) != null 
                         ? a.Imagens.FirstOrDefault(i => i.Principal)!.CaminhoFicheiro 
                         : (a.Imagens.FirstOrDefault() != null ? a.Imagens.FirstOrDefault()!.CaminhoFicheiro : null)
@@ -67,6 +69,7 @@ namespace Proj_finalweb_loja.Controllers
                 .Include(an => an.Vendedor)
                 .Include(an => an.Categoria)
                 .Include(an => an.Imagens)
+                .Include(an => an.AnuncioTags).ThenInclude(at => at.Tag)
                 .FirstOrDefaultAsync(an => an.Id == id);
 
             if (a == null)
@@ -86,6 +89,7 @@ namespace Proj_finalweb_loja.Controllers
                 VendedorId = a.VendedorFK,
                 VendedorNome = a.Vendedor != null ? a.Vendedor.Nome : "Desconhecido",
                 CategoriaNome = a.Categoria != null ? a.Categoria.Nome : "Sem Categoria",
+                Tags = a.AnuncioTags.Select(at => at.Tag.Nome).ToList(),
                 ImagemPrincipal = a.Imagens.FirstOrDefault(i => i.Principal) != null 
                     ? a.Imagens.FirstOrDefault(i => i.Principal)!.CaminhoFicheiro 
                     : (a.Imagens.FirstOrDefault() != null ? a.Imagens.FirstOrDefault()!.CaminhoFicheiro : null)
@@ -99,12 +103,14 @@ namespace Proj_finalweb_loja.Controllers
         /// Suporta filtros opcionais de pesquisa e categoria, com paginação.
         /// </summary>
         [HttpGet("ativos")]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<AnuncioDto>>> GetAnunciosAtivos([FromQuery] string? pesquisa = null, [FromQuery] int? categoriaId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var query = _context.Anuncios
                 .Include(a => a.Vendedor)
                 .Include(a => a.Categoria)
                 .Include(a => a.Imagens)
+                .Include(a => a.AnuncioTags).ThenInclude(at => at.Tag)
                 .Where(a => a.Ativo && a.Estado == EstadoAnuncio.Disponivel);
 
             if (!string.IsNullOrWhiteSpace(pesquisa))
@@ -120,6 +126,7 @@ namespace Proj_finalweb_loja.Controllers
 
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 20;
+            if (pageSize > 50) pageSize = 50;
 
             var anuncios = await query
                 .OrderByDescending(a => a.DataPublicacao)
@@ -137,6 +144,7 @@ namespace Proj_finalweb_loja.Controllers
                     VendedorId = a.VendedorFK,
                     VendedorNome = a.Vendedor != null ? a.Vendedor.Nome : "Desconhecido",
                     CategoriaNome = a.Categoria != null ? a.Categoria.Nome : "Sem Categoria",
+                    Tags = a.AnuncioTags.Select(at => at.Tag.Nome).ToList(),
                     ImagemPrincipal = a.Imagens.FirstOrDefault(i => i.Principal) != null 
                         ? a.Imagens.FirstOrDefault(i => i.Principal)!.CaminhoFicheiro 
                         : (a.Imagens.FirstOrDefault() != null ? a.Imagens.FirstOrDefault()!.CaminhoFicheiro : null)
